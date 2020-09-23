@@ -28,9 +28,9 @@ require_once($CFG->dirroot . '/mod/quiz/report/reportlib.php');
 require_once($CFG->dirroot . '/mod/quiz/report/attemptsreport.php');
 require_once($CFG->dirroot . '/mod/quiz/report/responsedownload/responsedownload_form.php');
 require_once($CFG->dirroot . '/mod/quiz/report/attemptsreport_options.php');
-require_once($CFG->dirroot . '/mod/quiz/report/responsedownload/classes/proforma_last_responses_table.php');
-require_once($CFG->dirroot . '/mod/quiz/report/responsedownload/classes/proforma_first_or_all_responses_table.php');
-require_once($CFG->dirroot . '/mod/quiz/report/responsedownload/classes/proforma_options.php');
+require_once($CFG->dirroot . '/mod/quiz/report/responsedownload/classes/responsedownload_last_responses_table.php');
+require_once($CFG->dirroot . '/mod/quiz/report/responsedownload/classes/responsedownload_first_or_all_responses_table.php');
+require_once($CFG->dirroot . '/mod/quiz/report/responsedownload/classes/responsedownload_options.php');
 
 
 /**

@@ -25,6 +25,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once($CFG->dirroot . '/mod/quiz/report/responsedownload/classes/responsedownload_options.php');
+
 /**
  * Zip data format writer for reponse values
  *
@@ -55,6 +57,9 @@ class dataformat_zip_writer extends \core\dataformat\base {
     /** @var null table object to get data from */
     protected $table = null;
 
+    /**
+     * Constructor
+     */
     public function __construct() {
         $this->ziparch = new zip_archive();
     }
@@ -139,15 +144,7 @@ class dataformat_zip_writer extends \core\dataformat\base {
         }
             
         $q = 1; // Question number.
-        $end = false;
-        while (!$end) {
-            if (!isset($this->columns['response' . $q])) {
-                $end = true;
-                break;
-            }
-            // Preset values.
-            // $editortext = null;
-            // $files = null;
+        while (isset($this->columns['response' . $q])) {
             // Response value will be an array with editor response or file list.
             list($editortext, $files) = $record[$this->columns['response' . $q]];
 
@@ -155,6 +152,18 @@ class dataformat_zip_writer extends \core\dataformat\base {
             $questionname = 'Q' . $q; // . '-'. $record[$this->columns['question' . $q]];
             $attemptname = $record[$this->columns['lastname']] . '-' .
                     $record[$this->columns['firstname']] . '-R' . $rownum;
+            
+            // Archive question text.
+            if ($options->showqtext) {
+                $questiontext = $record[$this->columns['question' . $q]];
+                if (!$this->ziparch->add_file_from_string($questionname . '/Questiontext.html', $questiontext)) {
+                    debugging("Can not zip '$responsefile' file", DEBUG_DEVELOPER);
+                    if (!$this->ignoreinvalidfiles) {
+                        $this->abort = true;
+                    }
+                }                
+            }            
+            
             switch ($options->folders) {
                 case quiz_responsedownload_options::QUESTION_WISE:
                     $archivepath =  $questionname . '/'. $attemptname;
@@ -167,9 +176,10 @@ class dataformat_zip_writer extends \core\dataformat\base {
             }
             $archivepath = trim($archivepath, '/') . '/';
 
+            
             if (is_string($editortext)) {
+                // Archive Editor content.
                 $responsefile = $this->responsefilename;
-                // Editor content.
                 switch ($options->editorfilename) {
                     case quiz_responsedownload_options::FIXED_NAME:
                         $responsefile = $archivepath . $responsefile;
@@ -198,10 +208,8 @@ class dataformat_zip_writer extends \core\dataformat\base {
                 }
             } 
             if (is_array($files)) {
-                // Files.
-                // $fs_count = 0;
+                // Archive Files.
                 foreach ($files as $zipfilepath => $storedfile) {
-                    // $fs_count++;
                     $filename = $storedfile->get_filename();
                     if (!$this->archive_stored($this->ziparch, $archivepath . $filename, $storedfile)) {
                         debugging("Can not zip '$archivepath' file", DEBUG_DEVELOPER);
