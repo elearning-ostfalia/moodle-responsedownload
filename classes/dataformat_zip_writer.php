@@ -15,21 +15,20 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Zip data format writer for proforma responses
+ * Zip data format writer for reponse values
  *
- * @package   proformasubmexport
+ * @package   responsedownload
  * @copyright  2020 Ostfalia Hochschule fuer angewandte Wissenschaften
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+
 defined('MOODLE_INTERNAL') || die();
 
-// require_once($CFG->dirroot . '/mod/quiz/report/proformasubmexport/classes/proforma_options.php');
-
 /**
- * Zip data format writer for proforma responses
+ * Zip data format writer for reponse values
  *
- * @package   proformasubmexport
+ * @package   responsedownload
  * @copyright  2020 Ostfalia Hochschule fuer angewandte Wissenschaften
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -72,7 +71,7 @@ class dataformat_zip_writer extends \core\dataformat\base {
      * store table object (reference)
      * @param $table
      */
-    public function set_table(/*quiz_proforma_last_responses_table*/ $table) {
+    public function set_table($table) {
         $this->table = $table;
     }
 
@@ -90,6 +89,7 @@ class dataformat_zip_writer extends \core\dataformat\base {
 
     /**
      * write stored file to zip archive
+     * (function is copied from zip_packer, original is private)
      * @param type $ziparch
      * @param type $archivepath
      * @param type $file
@@ -156,10 +156,10 @@ class dataformat_zip_writer extends \core\dataformat\base {
             $attemptname = $record[$this->columns['lastname']] . '-' .
                     $record[$this->columns['firstname']] . '-R' . $rownum;
             switch ($options->folders) {
-                case quiz_proforma_options::QUESTION_WISE:
+                case quiz_responsedownload_options::QUESTION_WISE:
                     $archivepath =  $questionname . '/'. $attemptname;
                     break;
-                case quiz_proforma_options::STUDENT_WISE:
+                case quiz_responsedownload_options::STUDENT_WISE:
                     $archivepath = $attemptname . '/' . $questionname;
                     break;
                 default:
@@ -171,17 +171,17 @@ class dataformat_zip_writer extends \core\dataformat\base {
                 $responsefile = $this->responsefilename;
                 // Editor content.
                 switch ($options->editorfilename) {
-                    case quiz_proforma_options::FIXED_NAME:
+                    case quiz_responsedownload_options::FIXED_NAME:
                         $responsefile = $archivepath . $responsefile;
                         break;
-                    case quiz_proforma_options::NAME_FROM_QUESTION_WITH_PATH:
-                    case quiz_proforma_options::NAME_FROM_QUESTION_WO_PATH:
+                    case quiz_responsedownload_options::NAME_FROM_QUESTION_WITH_PATH:
+                    case quiz_responsedownload_options::NAME_FROM_QUESTION_WO_PATH:
                         $questions = $this->table->get_questions();
                         $question = $questions[$q];
                         if (isset ($question->options) && isset($question->options->responsefilename)) {
                             $responsefile = $question->options->responsefilename;
                         }
-                        if ($options->editorfilename == quiz_proforma_options::NAME_FROM_QUESTION_WO_PATH) {
+                        if ($options->editorfilename == quiz_responsedownload_options::NAME_FROM_QUESTION_WO_PATH) {
                             $responsefile = basename($responsefile);
                         }
                         $responsefile = $archivepath . $responsefile;

@@ -17,7 +17,7 @@
 /**
  * This file defines the quiz proforma responses table.
  *
- * @package   proformasubmexport
+ * @package   responsedownload
  * @copyright 2008 Jean-Michel Vedrine, 2020 Ostfalia Hochschule fuer angewandte Wissenschaften
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -26,9 +26,8 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/mod/quiz/report/attemptsreport_table.php');
-require_once($CFG->dirroot . '/mod/quiz/report/proformasubmexport/classes/dataformat_zip_writer.php');
-require_once($CFG->dirroot . '/mod/quiz/report/proformasubmexport/classes/table_zip_export_format.php');
-
+require_once($CFG->dirroot . '/mod/quiz/report/responsedownload/classes/dataformat_zip_writer.php');
+require_once($CFG->dirroot . '/mod/quiz/report/responsedownload/classes/table_zip_export_format.php');
 
 /**
  * Modified version of question_attempt_steps_with_submitted_response_2_iterator.
@@ -91,13 +90,12 @@ class question_attempt_steps_with_submitted_response_2_iterator extends question
     }    
 }
 
-
 /**
  * This is a table subclass for downloading the proforma responses.
  * It is a copy of the class quiz_last_responses_table from Jean-Michel Vedrine
  * with some adaptations due to proforma question options.
  *
- * @package   proformasubmexport
+ * @package   responsedownload
  * @copyright  2008 Jean-Michel Vedrine, 2020 Ostfalia Hochschule fuer angewandte Wissenschaften
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -116,13 +114,13 @@ class quiz_proforma_last_responses_table extends quiz_attempts_report_table {
      * @param $quiz
      * @param $context
      * @param $qmsubselect
-     * @param quiz_proforma_options $options
+     * @param quiz_responsedownload_options $options
      * @param \core\dml\sql_join $groupstudentsjoins
      * @param \core\dml\sql_join $studentsjoins
      * @param $questions
      * @param $reporturl
      */
-    public function __construct($quiz, $context, $qmsubselect, quiz_proforma_options $options,
+    public function __construct($quiz, $context, $qmsubselect, quiz_responsedownload_options $options,
             \core\dml\sql_join $groupstudentsjoins, \core\dml\sql_join $studentsjoins, $questions, $reporturl) {
         parent::__construct('mod-quiz-report-proforma-submission-export', $quiz, $context,
                 $qmsubselect, $options, $groupstudentsjoins, $studentsjoins, $questions, $reporturl);

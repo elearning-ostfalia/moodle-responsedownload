@@ -17,13 +17,13 @@
 /**
  * Privacy Subsystem implementation for qtype_proforma.
  *
- * @package    quiz_proformasubmexport
+ * @package    quiz_responsedownload
  * @copyright  2019 Ostfalia Hochschule fuer angewandte Wissenschaften
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @author     K.Borm <k.borm[at]ostfalia.de>
  */
 
-namespace quiz_proformasubmexport\privacy;
+namespace quiz_responsedownload\privacy;
 
 defined('MOODLE_INTERNAL') || die();
 

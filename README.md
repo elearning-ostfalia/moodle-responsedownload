@@ -1,4 +1,4 @@
-# moodle-proformasubmexport
+# moodle-responsedownload
 
 #### Moodle Quiz Report Plugin for downloading Quiz responses as zip file. 
 
@@ -11,6 +11,6 @@ It focuses on question types that require the student to enter text in an editor
 
 
 #### Installation
-* Add the plugin folder ‘proformasubmexport’ under ‘mod/quiz/report’.
+* Add the plugin folder responsedownload under ‘mod/quiz/report’.
 
 The download form will be available as a quiz report. 

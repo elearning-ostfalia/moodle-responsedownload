@@ -17,8 +17,8 @@
 /**
  * This file defines the table_zip_export_format class.
  *
- * @package   proformasubmexport
- * @copyright 2020 Ostfalia Hochschule fuer angewandte Wissenschaften
+ * @package   responsedownload
+ * @copyright 2020 Ostfalia University of Applied Sciences
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file defines the setting form for the quiz proformasubmexport report.
+ * This file defines the setting form for the quiz responsedownload report.
  *
- * @package   quiz_proformasubmexport
+ * @package   quiz_responsedownload
  * @copyright modified: 2020 Ostfalia, 
  *            base: 2008 Jean-Michel Vedrine
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -27,32 +27,29 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/mod/quiz/report/attemptsreport_form.php');
 /**
- * Quiz proformasubmexport report settings form.
+ * Quiz responsedownload report settings form.
  *
- * @copyright 2008 Jean-Michel Vedrine, 2020 Ostfalia, 2017 IIT Bombay
+ * @copyright 2008 Jean-Michel Vedrine, 2020 Ostfalia
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-
-
-class quiz_proformasubmexport_settings_form extends mod_quiz_attempts_report_form {
+class quiz_responsedownload_settings_form extends mod_quiz_attempts_report_form {
 
     protected function other_preference_fields(MoodleQuickForm $mform) {
         $mform->addElement('header', 'preferencespage',
-                get_string('options', 'quiz_proformasubmexport'));
+                get_string('options', 'quiz_responsedownload'));
 
         $mform->addElement('select', 'folders',
-                get_string('folderhierarchy', 'quiz_proformasubmexport'), array(
-                        '1' => get_string('questionwise', 'quiz_proformasubmexport'),
-                        '2' => get_string('attemptwise', 'quiz_proformasubmexport'
+                get_string('folderhierarchy', 'quiz_responsedownload'), array(
+                        '1' => get_string('questionwise', 'quiz_responsedownload'),
+                        '2' => get_string('attemptwise', 'quiz_responsedownload'
                         )));
 
         $mform->addElement('select', 'editorfilename',
-                get_string('editorfilename', 'quiz_proformasubmexport'), array(
-                        '1' => get_string('fix', 'quiz_proformasubmexport') . ' (' .
-                                get_string('editorresponsename', 'quiz_proformasubmexport') . ')',
-                        '2' => get_string('pathname', 'quiz_proformasubmexport'),
-                        '3' => get_string('basename', 'quiz_proformasubmexport')
+                get_string('editorfilename', 'quiz_responsedownload'), array(
+                        '1' => get_string('fix', 'quiz_responsedownload') . ' (' .
+                                get_string('editorresponsename', 'quiz_responsedownload') . ')',
+                        '2' => get_string('pathname', 'quiz_responsedownload'),
+                        '3' => get_string('basename', 'quiz_responsedownload')
                 ));
 
         $mform->disabledIf('qtext', 'attempts', 'eq', quiz_attempts_report::ENROLLED_WITHOUT);
@@ -81,7 +78,7 @@ class quiz_proformasubmexport_settings_form extends mod_quiz_attempts_report_for
             $mform->disabledIf('whichtries', 'attempts', 'eq', quiz_attempts_report::ENROLLED_WITHOUT);
         }
         $mform->addElement('advcheckbox', 'qtext',
-                get_string('include', 'quiz_proformasubmexport'),
-                get_string('questiontext', 'quiz_proformasubmexport'));        
+                get_string('include', 'quiz_responsedownload'),
+                get_string('questiontext', 'quiz_responsedownload'));        
     }
 }

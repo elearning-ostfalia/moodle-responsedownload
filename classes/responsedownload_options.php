@@ -27,14 +27,13 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/mod/quiz/report/attemptsreport_options.php');
 
-
 /**
  * Class to store the options for a {@link quiz_responses_report}.
  *
  * @copyright 2012 The Open University
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class quiz_proforma_options extends mod_quiz_attempts_report_options {
+class quiz_responsedownload_options extends mod_quiz_attempts_report_options {
 
     /** @var bool whether to show the question text. */
     public $showqtext = false;
@@ -118,22 +117,22 @@ class quiz_proforma_options extends mod_quiz_attempts_report_options {
     public function setup_from_user_preferences() {
         parent::setup_from_user_preferences();
 
-        $this->showqtext   = get_user_preferences('quiz_report_proformasubmexport_qtext', $this->showqtext);
-        $this->folders     = get_user_preferences('quiz_report_proformasubmexport_folders', $this->folders);
-        $this->editorfilename = get_user_preferences('quiz_report_proformasubmexport_editorfilename', $this->editorfilename);
+        $this->showqtext   = get_user_preferences('quiz_report_responsedownload_qtext', $this->showqtext);
+        $this->folders     = get_user_preferences('quiz_report_responsedownload_folders', $this->folders);
+        $this->editorfilename = get_user_preferences('quiz_report_responsedownload_editorfilename', $this->editorfilename);
         if (quiz_allows_multiple_tries($this->quiz)) {
-            $this->whichtries    = get_user_preferences('quiz_report_proformasubmexport_which_tries', $this->whichtries);
+            $this->whichtries    = get_user_preferences('quiz_report_responsedownload_which_tries', $this->whichtries);
         }
     }
 
     public function update_user_preferences() {
         parent::update_user_preferences();
 
-        set_user_preference('quiz_report_proformasubmexport_qtext', $this->showqtext);
-        set_user_preference('quiz_report_proformasubmexport_folders', $this->folders);
-        set_user_preference('quiz_report_proformasubmexport_editorfilename', $this->editorfilename);
+        set_user_preference('quiz_report_responsedownload_qtext', $this->showqtext);
+        set_user_preference('quiz_report_responsedownload_folders', $this->folders);
+        set_user_preference('quiz_report_responsedownload_editorfilename', $this->editorfilename);
         if (quiz_allows_multiple_tries($this->quiz)) {
-            set_user_preference('quiz_report_proformasubmexport_which_tries', $this->whichtries);
+            set_user_preference('quiz_report_responsedownload_which_tries', $this->whichtries);
         }
     }
 

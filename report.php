@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file defines the quiz proformasubmexport report class.
+ * This file defines the quiz responsedownload report class.
  *
- * @package   quiz_proformasubmexport
+ * @package   quiz_responsedownload
  * @copyright 2006 Jean-Michel Vedrine, 2020 Ostfalia University of Applied sciences
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -26,16 +26,15 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/mod/quiz/report/reportlib.php');
 require_once($CFG->dirroot . '/mod/quiz/report/attemptsreport.php');
-require_once($CFG->dirroot . '/mod/quiz/report/proformasubmexport/proformasubmexport_form.php');
+require_once($CFG->dirroot . '/mod/quiz/report/responsedownload/responsedownload_form.php');
 require_once($CFG->dirroot . '/mod/quiz/report/attemptsreport_options.php');
-require_once($CFG->dirroot . '/mod/quiz/report/proformasubmexport/classes/proforma_last_responses_table.php');
-require_once($CFG->dirroot . '/mod/quiz/report/proformasubmexport/classes/proforma_first_or_all_responses_table.php');
-require_once($CFG->dirroot . '/mod/quiz/report/proformasubmexport/classes/proforma_options.php');
-
+require_once($CFG->dirroot . '/mod/quiz/report/responsedownload/classes/proforma_last_responses_table.php');
+require_once($CFG->dirroot . '/mod/quiz/report/responsedownload/classes/proforma_first_or_all_responses_table.php');
+require_once($CFG->dirroot . '/mod/quiz/report/responsedownload/classes/proforma_options.php');
 
 
 /**
- * Quiz report subclass for the proformasubmexport report.
+ * Quiz report subclass for the responsedownload report.
  *
  * This report allows you to download editor responses and file attachments submitted
  * by students as a response to quiz proforma questions.
@@ -43,16 +42,16 @@ require_once($CFG->dirroot . '/mod/quiz/report/proformasubmexport/classes/profor
  * @copyright 2020 Ostfalia, 1999 onwards Martin Dougiamas and others {@link http://moodle.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class quiz_proformasubmexport_report extends quiz_attempts_report {
+class quiz_responsedownload_report extends quiz_attempts_report {
 
     public function display($quiz, $cm, $course) {
         global $OUTPUT, $DB;
 
         // Initialisation.
         list($currentgroup, $studentsjoins, $groupstudentsjoins, $allowedjoins) = $this->init(
-            'proformasubmexport', 'quiz_proformasubmexport_settings_form', $quiz, $cm, $course);
+            'responsedownload', 'quiz_responsedownload_settings_form', $quiz, $cm, $course);
 
-        $options = new quiz_proforma_options('proformasubmexport', $quiz, $cm, $course);
+        $options = new quiz_responsedownload_options('responsedownload', $quiz, $cm, $course);
 
         if ($fromform = $this->form->get_data()) {
             $options->process_settings_from_form($fromform);

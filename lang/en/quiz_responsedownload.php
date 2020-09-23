@@ -15,17 +15,15 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for component 'quiz_proformasubmexport', language 'en'
+ * Strings for component 'quiz_responsedownload', language 'en'
  *
- * @package   quiz_proformasubmexport
- * @copyright 2017 IIT Bombay
- * @author    Kashmira Nagwekar
+ * @package   quiz_responsedownload
+ * @copyright Ostfalia, Moodle (many texts are copied from quiz_responses)
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['proformasubmexport'] = 'Download ProFormA submissions';
-//$string['proformasubmexportreport'] = 'Download submissions report';
-$string['pluginname'] = 'Download proforma submissions';
+$string['responsedownload'] = 'Download responses';
+$string['pluginname'] = 'Download responses';
 $string['plugindescription'] = 'Download files/text responses submitted by all students (all attempts) in response to quiz proforma questions.<br><br>';
 
 $string['options'] = 'Download format options';
@@ -45,6 +43,7 @@ $string['includetextresponse'] = 'Include text response file';
 $string['questiontext'] = 'Question text';
 $string['include'] = 'What values to include';
 
+$string['privacy:metadata'] = 'The Response Download plugin does not store any personal data. It provides an interface for users to store data without storing any data itself.';
 
-$string['privacy:metadata'] = 'The Download ProFormA submissions plugin does not store any personal data.';
+
 

@@ -15,15 +15,15 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for component 'quiz_proformasubmexport', language 'de'
+ * Strings for component 'quiz_responsedownload', language 'de'
  *
- * @package   quiz_proformasubmexport
+ * @package   quiz_responsedownload
  * @copyright Ostfalia
  * @author    K. Borm
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['proformasubmexport'] = 'Herunterladen von Text/Datei-Abgaben';
+$string['responsedownload'] = 'Herunterladen von Text/Datei-Abgaben';
 $string['pluginname'] = ' Herunterladen von Abgaben';
 $string['plugindescription'] = 'Herunterladen der Text/Datei-Abgaben, insbesondere für Freitext- und ProFormA-Aufgabemn.<br><br>';
 
@@ -43,4 +43,4 @@ $string['includetextresponse'] = 'Textantworten einbeziehen';
 $string['questiontext'] = 'Fragetext';
 $string['include'] = 'Welche Werte darstellen';
 
-$string['privacy:metadata'] = 'Das Plugin zum Herunterladen von ProFormA-Abgaben speichert keine persönlichen Daten.';
+$string['privacy:metadata'] = 'Das Plugin zum Herunterladen von Text/Datei-Abgaben speichert keine personenbezogenen Daten. Es ist eine Nutzerschnittstelle zum Herunterladen von Daten.';
