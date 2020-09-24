@@ -103,6 +103,12 @@ class question_attempt_steps_with_submitted_response_2_iterator extends question
  */
 class quiz_responsedownload_last_responses_table extends quiz_last_responses_table {
 
+    /* usageid of last attempt */
+    protected $lastusageid = null;
+    /* last question usage (cache)*/
+    protected $lastquba = null;
+    
+    
     /**
      * Constructor.
      *
@@ -122,6 +128,9 @@ class quiz_responsedownload_last_responses_table extends quiz_last_responses_tab
     }
 
     public function build_table() {
+        $this->lastusageid = null;
+        $this->lastquba = null;
+    
         if (!$this->rawdata) {
             return;
         }
@@ -133,7 +142,6 @@ class quiz_responsedownload_last_responses_table extends quiz_last_responses_tab
         
 
         $this->strtimeformat = '%F-%H-%M';
-        // $this->strtimeformat = '%Y-%m-%d-%H-%M';
         // $result1 = xdebug_start_trace('xdebugtrace_build_table', 2);
         // Note that we must call the build_table of grandparent because otherwise we cannot
         // change the timestamp format.
@@ -240,14 +248,22 @@ class quiz_responsedownload_last_responses_table extends quiz_last_responses_tab
         // Assume only one key in each array is used per question.
         $answerkeys = array('answer');
         $attachmentkeys = array('attachments');
-
-        // TODO: Try and use already fetched data! Do not read once more!
-        // Get question attempt.
-        $dm = new question_engine_data_mapper();
-        $quba = $dm->load_questions_usage_by_activity($attempt->usageid);
+        
+        // Get question usage
+        if ($attempt->usageid == $this->lastusageid) {
+            // Get cached question usage.
+            $quba = $this->lastquba;
+        } else {
+            // Get question usage from database.
+            $dm = new question_engine_data_mapper();
+            $quba = $dm->load_questions_usage_by_activity($attempt->usageid);
+            $this->lastusageid = $attempt->usageid;
+            $this->lastquba = $quba;
+        }
         $qubacontextid = $quba->get_owning_context()->id;
         $qa = $quba->get_question_attempt($slot);
         unset($quba);
+       
 
         // Preset return values.
         $files = array();
