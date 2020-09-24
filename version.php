@@ -27,8 +27,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->version   = 2020092300;
-$plugin->requires  = 2017051500;
-$plugin->cron      = 18000;
+$plugin->requires = 2019111200;
 $plugin->component = 'quiz_responsedownload';
 $plugin->maturity  = MATURITY_BETA;
 $plugin->release   = '1.0.0';

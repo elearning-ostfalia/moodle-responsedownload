@@ -15,10 +15,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Class to store the options for a {@link quiz_responses_report}.
+ * Class to store the options for a {@link quiz_responsedownload}.
+ * Parts of this code is copied from quiz_responses.
  *
- * @package   quiz_responses
- * @copyright 2012 The Open University
+ * @package   quiz_responsedownload
+ * @copyright 2020 Ostfalia University of Applied Sciences, 2012 The Open University
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -28,9 +29,9 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot . '/mod/quiz/report/attemptsreport_options.php');
 
 /**
- * Class to store the options for a {@link quiz_responses_report}.
+ * Class to store the options for a {@link quiz_responsedownload}.
  *
- * @copyright 2012 The Open University
+ * @copyright 2020 Ostfalia University of Applied Sciences, 2012 The Open University
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class quiz_responsedownload_options extends mod_quiz_attempts_report_options {

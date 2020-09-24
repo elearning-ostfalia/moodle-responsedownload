@@ -17,7 +17,7 @@
 /**
  * This file defines the quiz proforma responses table.
  *
- * @package   responsedownload
+ * @package   quiz_responsedownload
  * @copyright 2008 Jean-Michel Vedrine, 2020 Ostfalia Hochschule fuer angewandte Wissenschaften
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

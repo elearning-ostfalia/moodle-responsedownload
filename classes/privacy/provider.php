@@ -28,7 +28,7 @@ namespace quiz_responsedownload\privacy;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Privacy Subsystem for quiz_proformasubmexport implementing null_provider.
+ * Privacy Subsystem for quiz_responsedownload implementing null_provider.
  *
  * @copyright  2019 Ostfalia Hochschule fuer angewandte Wissenschaften
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later

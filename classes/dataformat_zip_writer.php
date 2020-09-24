@@ -148,10 +148,7 @@ class dataformat_zip_writer extends \core\dataformat\base {
             // Response value will be an array with editor response or file list.
             list($editortext, $files) = $record[$this->columns['response' . $q]];
 
-            // Create pathname.
-            $questionname = 'Q' . $q; // . '-'. $record[$this->columns['question' . $q]];
-            $attemptname = $record[$this->columns['lastname']] . '-' .
-                    $record[$this->columns['firstname']] . '-R' . $rownum;
+            $questionname = 'Q' . $q;
             
             // Archive question text.
             if ($options->showqtext) {
@@ -164,6 +161,9 @@ class dataformat_zip_writer extends \core\dataformat\base {
                 }                
             }            
             
+            // Create pathname.
+            $attemptname = $record[$this->columns['lastname']] . '-' .
+                    $record[$this->columns['firstname']] . '-R' . $rownum;
             switch ($options->folders) {
                 case quiz_responsedownload_options::QUESTION_WISE:
                     $archivepath =  $questionname . '/'. $attemptname;
@@ -175,7 +175,6 @@ class dataformat_zip_writer extends \core\dataformat\base {
                     throw new coding_exception('folders option not supported ' . $options->folders);
             }
             $archivepath = trim($archivepath, '/') . '/';
-
             
             if (is_string($editortext)) {
                 // Archive Editor content.
@@ -200,6 +199,7 @@ class dataformat_zip_writer extends \core\dataformat\base {
                         throw new coding_exception('editorfilename option not set');
                 }
                 $content = $editortext;
+                $responsefile = clean_param($responsefile, PARAM_PATH);
                 if (!$this->ziparch->add_file_from_string($responsefile, $content)) {
                     debugging("Can not zip '$responsefile' file", DEBUG_DEVELOPER);
                     if (!$this->ignoreinvalidfiles) {
@@ -210,7 +210,7 @@ class dataformat_zip_writer extends \core\dataformat\base {
             if (is_array($files)) {
                 // Archive Files.
                 foreach ($files as $zipfilepath => $storedfile) {
-                    $filename = $storedfile->get_filename();
+                    $filename = clean_param($storedfile->get_filename(), PARAM_PATH);
                     if (!$this->archive_stored($this->ziparch, $archivepath . $filename, $storedfile)) {
                         debugging("Can not zip '$archivepath' file", DEBUG_DEVELOPER);
                         if (!$this->ignoreinvalidfiles) {

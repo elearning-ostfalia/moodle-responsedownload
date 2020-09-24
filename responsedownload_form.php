@@ -16,6 +16,7 @@
 
 /**
  * This file defines the setting form for the quiz responsedownload report.
+ * Some parts are copied from quiz_responses.
  *
  * @package   quiz_responsedownload
  * @copyright modified: 2020 Ostfalia, 

@@ -72,8 +72,7 @@ class quiz_responsedownload_report extends quiz_attempts_report {
         }
         $table = new $tableclassname($quiz, $this->context, $this->qmsubselect,
                 $options, $groupstudentsjoins, $studentsjoins, $questions, $options->get_url());
-        $filename = quiz_report_download_filename('proformasubm', // get_string('responsesfilename', 'quiz_responses'),
-                $courseshortname, $quiz->name);
+        $filename = quiz_report_download_filename('responses', $courseshortname, $quiz->name);
 
         $table->is_downloading($options->download, $filename,
                 $courseshortname . ' ' . format_string($quiz->name, true));

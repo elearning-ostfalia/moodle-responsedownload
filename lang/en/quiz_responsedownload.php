@@ -18,7 +18,7 @@
  * Strings for component 'quiz_responsedownload', language 'en'
  *
  * @package   quiz_responsedownload
- * @copyright Ostfalia, Moodle (many texts are copied from quiz_responses)
+ * @copyright Ostfalia, Moodle (some texts are copied from quiz_responses)
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
