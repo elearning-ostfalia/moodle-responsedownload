@@ -122,7 +122,7 @@ class quiz_responsedownload_last_responses_table extends quiz_last_responses_tab
      */
     public function __construct($quiz, $context, $qmsubselect, quiz_responsedownload_options $options,
             \core\dml\sql_join $groupstudentsjoins, \core\dml\sql_join $studentsjoins, $questions, $reporturl) {
-        parent::__construct('mod-quiz-responsedownload', $quiz, $context,
+        quiz_attempts_report_table::__construct('mod-quiz-responsedownload', $quiz, $context,
                 $qmsubselect, $options, $groupstudentsjoins, $studentsjoins, $questions, $reporturl);
     }
 

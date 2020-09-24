@@ -17,12 +17,7 @@
 /**
  * This file defines the quiz responses table for showing last try at question.
  * 
- * responsedownload modfications: 
- * - constructor parameters are slightly modified to allow polymorphism: 
- *   + uinique id added at interface
- *   + options class name changed to options base class name
- *
- * @package   quiz_responses / responsedownload
+ * @package   quiz_responses
  * @copyright 2008 Jean-Michel Vedrine
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -52,10 +47,9 @@ class quiz_last_responses_table extends quiz_attempts_report_table {
      * @param array $questions
      * @param moodle_url $reporturl
      */
-    public function __construct($uniqueid /*added*/, $quiz, $context, $qmsubselect, 
-            mod_quiz_attempts_report_options /* expected class modified */$options,
+    public function __construct($quiz, $context, $qmsubselect, quiz_responses_options $options,
             \core\dml\sql_join $groupstudentsjoins, \core\dml\sql_join $studentsjoins, $questions, $reporturl) {
-        parent::__construct($uniqueid /*'mod-quiz-report-responses-report'*/, $quiz, $context,
+        parent::__construct('mod-quiz-report-responses-report', $quiz, $context,
                 $qmsubselect, $options, $groupstudentsjoins, $studentsjoins, $questions, $reporturl);
     }
 
