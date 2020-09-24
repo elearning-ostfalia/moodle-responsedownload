@@ -132,6 +132,22 @@ class quiz_responsedownload_report extends quiz_attempts_report {
 
         return true;
     }
+    
+
+    protected function configure_user_columns($table) {
+        // $table->column_suppress('email');        
+        // $table->column_suppress('picture');
+        // $table->column_suppress('fullname');
+        $extrafields = get_extra_user_fields($this->context);
+        foreach ($extrafields as $field) {
+            // $table->column_suppress($field);
+        }
+
+        $table->column_class('picture', 'picture');
+        $table->column_class('lastname', 'bold');
+        $table->column_class('firstname', 'bold');
+        $table->column_class('fullname', 'bold');
+    }    
 
     /**
      *
@@ -155,6 +171,11 @@ class quiz_responsedownload_report extends quiz_attempts_report {
         $headers = array();
 
         $this->add_user_columns($table, $columns, $headers);
+        /* if ($table->is_downloading()) {
+            // Add fullname.
+            $columns[] = 'username';
+            $headers[] = 'username';
+        } */
         $this->add_state_column($columns, $headers);
 
         if ($table->is_downloading()) {

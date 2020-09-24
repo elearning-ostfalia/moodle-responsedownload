@@ -143,7 +143,10 @@ class dataformat_zip_writer extends \core\dataformat\base {
         if (!$options) {
             throw new coding_exception('options not set');
         }
-
+        if (count($record) != count($this->columns)) {
+            throw new coding_exception('number of columns does not match row size');
+        }
+        
         $q = 1; // Question number.
         while (isset($this->columns['response' . $q])) {
             // Response value will be an array with editor response or file list.
@@ -163,8 +166,18 @@ class dataformat_zip_writer extends \core\dataformat\base {
             }
 
             // Create pathname.
+            if (array_key_exists('username', $this->columns)) {
+                // The username field is only available if set in the config.php
+                // $CFG->showuseridentity = 'username';
+                // and if the user has the capability 'moodle/site:viewuseridentity'
+                $username = $record[$this->columns['username']];                
+            }
+            
             $attemptname = $record[$this->columns['lastname']] . '-' .
                     $record[$this->columns['firstname']] . '-R' . $rownum;
+            if (!empty($username)) {
+                $attemptname = $username . '-'. $attemptname;                
+            }
             switch ($options->folders) {
                 case quiz_responsedownload_options::QUESTION_WISE:
                     $archivepath = $questionname . '/'. $attemptname;

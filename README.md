@@ -16,6 +16,14 @@ But other question types may also work.
 
 The download form will be available as a quiz report. 
 
+Note: The student information written into the archive will contain the first name and the 
+surname. 
+If the person who creates the archive has 'moodle/site:viewuseridentity' capabilty
+AND in config.php the configuration value 
+$CFG->showuseridentity contains 'username' then also the username (loginname) will 
+be prepended to the student name.
+
+
 #### Design
 
 The code uses many parts of the quiz_responses plugin which is part of Moodle core 
