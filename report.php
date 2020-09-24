@@ -61,7 +61,7 @@ class quiz_responsedownload_report extends quiz_attempts_report {
         $this->form->set_data($options->get_initial_form_data());
 
         // Load the required questions.
-        $questions = $this->load_fullquestions($quiz); // quiz_report_get_significant_questions($quiz);
+        $questions = $this->load_fullquestions($quiz);
         // Prepare for downloading, if applicable.
         $courseshortname = format_string($course->shortname, true,
                 array('context' => context_course::instance($course->id)));
@@ -119,15 +119,14 @@ class quiz_responsedownload_report extends quiz_attempts_report {
 
                 // Print the display options.
                 $this->form->display();
-            }            
+            }
             $hasstudents = $hasstudents && (!$currentgroup || $this->hasgroupstudents);
-            if ($hasquestions && ($hasstudents || $options->attempts == self::ALL_WITH)) {            
+            if ($hasquestions && ($hasstudents || $options->attempts == self::ALL_WITH)) {
                 $this->create_table($table, $questions, $quiz, $options, $allowedjoins);
             }
-        } catch (Exception $ex) {
         } finally {
             if (!$gcenabled) {
-                gc_disable();                
+                gc_disable();
             }
         }
 
@@ -135,7 +134,7 @@ class quiz_responsedownload_report extends quiz_attempts_report {
     }
 
     /**
-     * 
+     *
      * @param type $table
      * @param type $hasstudents
      * @param type $hasquestions
@@ -156,9 +155,6 @@ class quiz_responsedownload_report extends quiz_attempts_report {
         $headers = array();
 
         $this->add_user_columns($table, $columns, $headers);
-        // Remove Email address.
-        // unset($columns[2]);
-        // unset($headers[2]);
         $this->add_state_column($columns, $headers);
 
         if ($table->is_downloading()) {
@@ -172,15 +168,8 @@ class quiz_responsedownload_report extends quiz_attempts_report {
                 $columns[] = 'question' . $id;
                 $headers[] = get_string('questionx', 'question', $question->number);
             }
-            // if ($options->showresponses) {
-                $columns[] = 'response' . $id;
-                $headers[] = get_string('responsex', 'quiz_responses', $question->number);
-            // }
-            /*
-            if ($options->showright) {
-                $columns[] = 'right' . $id;
-                $headers[] = get_string('rightanswerx', 'quiz_responses', $question->number);
-            }*/
+            $columns[] = 'response' . $id;
+            $headers[] = get_string('responsex', 'quiz_responses', $question->number);
         }
 
         $table->define_columns($columns);
@@ -197,13 +186,10 @@ class quiz_responsedownload_report extends quiz_attempts_report {
 
         $table->set_attribute('id', 'responses');
 
-        $table->collapsible(true);           
-        // Start Xdebug trace.
-        // xdebug_start_trace('xdebugtrace_out');
+        $table->collapsible(true);
         $table->out($options->pagesize, true);
-        // xdebug_stop_trace();
     }
-    
+
     /**
      * Load the questions in this quiz and add some properties to the objects needed in the reports.
      *

@@ -70,7 +70,8 @@ class table_zip_export_format extends table_dataformat_export_format {
      * 
      * @param type $table
      */
-    public function set_table_object($table) { // Must not be named set_table due to name clash.
+    public function set_table_object($table) {
+        // Must not be named set_table due to name clash.
         $this->dataformat->set_table($table);
     }
 }

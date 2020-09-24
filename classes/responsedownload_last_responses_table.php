@@ -40,21 +40,21 @@ require_once($CFG->dirroot . '/mod/quiz/report/responsedownload/classes/last_res
 class question_attempt_steps_with_submitted_response_2_iterator extends question_attempt_steps_with_submitted_response_iterator {
     /**
      * checks if there is actual data within this data (no data starting with _).
-     * This is relevant to detect a last step with data without pressing 
+     * This is relevant to detect a last step with data without pressing
      * the submit button.
-     * 
+     *
      * @param type $qtdata
      */
     protected function has_actual_data($qtdata) {
         foreach ($qtdata as $key => $value) {
             if ($key[0] != '_') {
                 return true;
-            }            
+            }
         }
-        
-       return false;
+
+        return false;
     }
-    
+
     /**
      * Find the step nos  in which a student has submitted a response. Including any step with a response that is saved before
      * the question attempt finishes.
@@ -73,7 +73,8 @@ class question_attempt_steps_with_submitted_response_2_iterator extends question
                 $qtdata = $step->get_qt_data();
                 // Use different method in order to detect if
                 // we have a last saved step.
-                if ($this->has_actual_data($qtdata)) { // { count($qtdata)) {
+                // Original condition: count($qtdata) > 0.
+                if ($this->has_actual_data($qtdata)) {
                     $lastsavedstep = $stepno;
                 }
             }
@@ -88,12 +89,12 @@ class question_attempt_steps_with_submitted_response_2_iterator extends question
             // Re-index array so index starts with 1.
             $this->stepswithsubmittedresponses = array_combine(range(1, count($stepnos)), $stepnos);
         }
-    }    
+    }
 }
 
 /**
  * This is a table subclass for downloading the responses.
- * It is derived from quiz_last_responses_table and add special handling for 
+ * It is derived from quiz_last_responses_table and add special handling for
  * the response column.
  *
  * @package   responsedownload
@@ -201,19 +202,24 @@ class quiz_responsedownload_last_responses_table extends quiz_last_responses_tab
         return $value;
     }
 
+    /**
+     * handle response column
+     *
+     * @param type $colname
+     * @param type $attempt
+     * @return type
+     */
     public function other_cols($colname, $attempt) {
         if (preg_match('/^response(\d+)$/', $colname, $matches)) {
-           // New: resturn response instead of response summary..
-           return $this->data_col($matches[1], 'response', $attempt);
+            // New: handle response.
+            return $this->data_col($matches[1], 'response', $attempt);
         } else {
             return parent::other_cols($colname, $attempt);
         }
     }
 
-    // New functions.
-
     /**
-     * retrieves the student response from editor or file upload 
+     * retrieves the student response from editor or file upload
      * @param type $attempt
      * @param type $slot
      * @return type
@@ -228,10 +234,8 @@ class quiz_responsedownload_last_responses_table extends quiz_last_responses_tab
         // TODO: Try and use already fetched data! Do not read once more!
         // Get question attempt.
         $dm = new question_engine_data_mapper();
-        $quba = $dm->load_questions_usage_by_activity($attempt->usageid); // qubaid);
-        $quba_contextid = $quba->get_owning_context()->id;
-        // nur Zugriff!
-        // $quba = $this->lateststeps[$attempt->usageid];
+        $quba = $dm->load_questions_usage_by_activity($attempt->usageid);
+        $qubacontextid = $quba->get_owning_context()->id;
         $qa = $quba->get_question_attempt($slot);
         unset($quba);
 
@@ -239,33 +243,33 @@ class quiz_responsedownload_last_responses_table extends quiz_last_responses_tab
         $files = array();
         $editortext = null;
         if (isset($attempt->try)) {
+            // All tries or first try:
             // We have to check the try data.
             $submissionsteps = new question_attempt_steps_with_submitted_response_2_iterator($qa);
-            // $submissionsteps = $qa->get_steps_with_submitted_response_iterator();
             $step = $submissionsteps[$attempt->try];
             if ($step === null) {
                 return array ($editortext, $files);
             }
             $qtdata = $step->get_qt_data();
-            foreach($answerkeys as $key) {
+            foreach ($answerkeys as $key) {
                 if (isset($qtdata[$key])) {
                     $answer = $qtdata[$key];
-                }                
+                }
             }
-            foreach($attachmentkeys as $key) {            
+            foreach ($attachmentkeys as $key) {
                 if (isset($qtdata[$key])) {
-                    $var_attachments = $qtdata[$key];
-                    $files = $step->get_qt_files($key, $quba_contextid);
+                    // $attachments = $qtdata[$key];
+                    $files = $step->get_qt_files($key, $qubacontextid);
                 }
             }
         } else {
             // Only use last try.
-            foreach($answerkeys as $key) {            
+            foreach ($answerkeys as $key) {
                 $answer = $qa->get_last_qt_var($key);
             }
-            foreach($attachmentkeys as $key) {                
-                $var_attachments = $qa->get_last_qt_var($key);
-                $files = $qa->get_last_qt_files($key, $quba_contextid);
+            foreach ($attachmentkeys as $key) {
+                // $attachments = $qa->get_last_qt_var($key);
+                $files = $qa->get_last_qt_files($key, $qubacontextid);
             }
         }
         // Get text from editor.
@@ -279,7 +283,7 @@ class quiz_responsedownload_last_responses_table extends quiz_last_responses_tab
                 $editortext = $answer;
             }
         }
-  
+
         unset($qa);
         // Force garbage collector to work because this function allocates a lot of memory.
         gc_collect_cycles();
@@ -291,12 +295,9 @@ class quiz_responsedownload_last_responses_table extends quiz_last_responses_tab
      * only display zip as choice option.
      * Note that the download button should bee a secondary button (at first you need
      * to load the report)
-     *
      */
     public function download_buttons() {
         global $OUTPUT;
-        //return $OUTPUT->download_dataformat_selector('KARIN', // get_string('downloadas', 'table'),
-        //    $this->baseurl->out_omit_querystring(), 'download', $this->baseurl->params());
 
         if ($this->is_downloadable() && !$this->is_downloading()) {
             $label = get_string('downloadas', 'table');
@@ -309,7 +310,7 @@ class quiz_responsedownload_last_responses_table extends quiz_last_responses_tab
             }
             $data = array(
                 'label' => $label,
-                'base' =>  $this->baseurl->out_omit_querystring(),
+                'base' => $this->baseurl->out_omit_querystring(),
                 'name' => 'download',
                 'params' => $hiddenparams,
                 'options' => [[
@@ -326,7 +327,7 @@ class quiz_responsedownload_last_responses_table extends quiz_last_responses_tab
             return '';
         }
     }
-    
+
     public function get_options() {
         return $this->options;
     }
@@ -339,7 +340,7 @@ class quiz_responsedownload_last_responses_table extends quiz_last_responses_tab
      * @param $exportclass (optional) if passed, set the table to use this export class.
      * @return table_default_export_format_parent the export class in use (after any set).
      */
-    function export_class_instance($exportclass = null) {
+    public function export_class_instance($exportclass = null) {
         if (!is_null($exportclass)) {
             $this->started_output = true;
             $this->exportclass = $exportclass;

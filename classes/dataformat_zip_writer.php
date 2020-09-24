@@ -112,7 +112,8 @@ class dataformat_zip_writer extends \core\dataformat\base {
         // Create directory????
         $baselength = strlen($file->get_filepath());
         $fs = get_file_storage();
-        $files = $fs->get_directory_files($file->get_contextid(), $file->get_component(), $file->get_filearea(), $file->get_itemid(),
+        $files = $fs->get_directory_files($file->get_contextid(),
+                $file->get_component(), $file->get_filearea(), $file->get_itemid(),
                 $file->get_filepath(), true, true);
         foreach ($files as $file) {
             $path = $file->get_filepath();
@@ -142,14 +143,14 @@ class dataformat_zip_writer extends \core\dataformat\base {
         if (!$options) {
             throw new coding_exception('options not set');
         }
-            
+
         $q = 1; // Question number.
         while (isset($this->columns['response' . $q])) {
             // Response value will be an array with editor response or file list.
             list($editortext, $files) = $record[$this->columns['response' . $q]];
 
             $questionname = 'Q' . $q;
-            
+
             // Archive question text.
             if ($options->showqtext) {
                 $questiontext = $record[$this->columns['question' . $q]];
@@ -158,15 +159,15 @@ class dataformat_zip_writer extends \core\dataformat\base {
                     if (!$this->ignoreinvalidfiles) {
                         $this->abort = true;
                     }
-                }                
-            }            
-            
+                }
+            }
+
             // Create pathname.
             $attemptname = $record[$this->columns['lastname']] . '-' .
                     $record[$this->columns['firstname']] . '-R' . $rownum;
             switch ($options->folders) {
                 case quiz_responsedownload_options::QUESTION_WISE:
-                    $archivepath =  $questionname . '/'. $attemptname;
+                    $archivepath = $questionname . '/'. $attemptname;
                     break;
                 case quiz_responsedownload_options::STUDENT_WISE:
                     $archivepath = $attemptname . '/' . $questionname;
@@ -175,7 +176,7 @@ class dataformat_zip_writer extends \core\dataformat\base {
                     throw new coding_exception('folders option not supported ' . $options->folders);
             }
             $archivepath = trim($archivepath, '/') . '/';
-            
+
             if (is_string($editortext)) {
                 // Archive Editor content.
                 $responsefile = $this->responsefilename;
@@ -206,7 +207,7 @@ class dataformat_zip_writer extends \core\dataformat\base {
                         $this->abort = true;
                     }
                 }
-            } 
+            }
             if (is_array($files)) {
                 // Archive Files.
                 foreach ($files as $zipfilepath => $storedfile) {
@@ -217,9 +218,6 @@ class dataformat_zip_writer extends \core\dataformat\base {
                             $this->abort = true;
                         }
                     }
-                    // $pathfilename = $pathprefix . $storedfile->get_filepath() . $zipfilename;
-                    // $pathfilename = clean_param($pathfilename, PARAM_PATH);
-                    // $filesforzipping[$pathfilename] = $storedfile;
                 }
             }
             $q++;

@@ -19,7 +19,7 @@
  * Some parts are copied from quiz_responses.
  *
  * @package   quiz_responsedownload
- * @copyright modified: 2020 Ostfalia, 
+ * @copyright modified: 2020 Ostfalia,
  *            base: 2008 Jean-Michel Vedrine
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -35,6 +35,11 @@ require_once($CFG->dirroot . '/mod/quiz/report/attemptsreport_form.php');
  */
 class quiz_responsedownload_settings_form extends mod_quiz_attempts_report_form {
 
+    /**
+     * add 'preference' fields
+     *
+     * @param MoodleQuickForm $mform
+     */
     protected function other_preference_fields(MoodleQuickForm $mform) {
         $mform->addElement('header', 'preferencespage',
                 get_string('options', 'quiz_responsedownload'));
@@ -56,17 +61,29 @@ class quiz_responsedownload_settings_form extends mod_quiz_attempts_report_form 
         $mform->disabledIf('qtext', 'attempts', 'eq', quiz_attempts_report::ENROLLED_WITHOUT);
     }
 
+    /**
+     * validation
+     *
+     * @param type $data
+     * @param type $files
+     * @return type
+     */
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
 
-        if ($data['attempts'] != quiz_attempts_report::ENROLLED_WITHOUT && !(
-                $data['qtext'] /* || $data['resp'] || $data['right'] */ )) {
+        if ($data['attempts'] != quiz_attempts_report::ENROLLED_WITHOUT &&
+            !($data['qtext'])) {
             $errors['coloptions'] = get_string('reportmustselectstate', 'quiz');
         }
 
         return $errors;
     }
 
+    /**
+     * add attempt fields
+     *
+     * @param MoodleQuickForm $mform
+     */
     protected function other_attempt_fields(MoodleQuickForm $mform) {
         parent::other_attempt_fields($mform);
         if (quiz_allows_multiple_tries($this->_customdata['quiz'])) {
@@ -80,6 +97,6 @@ class quiz_responsedownload_settings_form extends mod_quiz_attempts_report_form 
         }
         $mform->addElement('advcheckbox', 'qtext',
                 get_string('include', 'quiz_responsedownload'),
-                get_string('questiontext', 'quiz_responsedownload'));        
+                get_string('questiontext', 'quiz_responsedownload'));
     }
 }
