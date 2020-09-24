@@ -18,7 +18,7 @@
  * This file defines the quiz responsedownload table.
  *
  * @package   quiz_responsedownload
- * @copyright 2008 Jean-Michel Vedrine, 2020 Ostfalia Hochschule fuer angewandte Wissenschaften
+ * @copyright 2020 Ostfalia Hochschule fuer angewandte Wissenschaften
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -27,6 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot . '/mod/quiz/report/attemptsreport_table.php');
 require_once($CFG->dirroot . '/mod/quiz/report/responsedownload/classes/dataformat_zip_writer.php');
 require_once($CFG->dirroot . '/mod/quiz/report/responsedownload/classes/table_zip_export_format.php');
+require_once($CFG->dirroot . '/mod/quiz/report/responsedownload/classes/last_responses_table.php');
 
 
 /**
@@ -92,21 +93,14 @@ class question_attempt_steps_with_submitted_response_2_iterator extends question
 
 /**
  * This is a table subclass for downloading the responses.
- * It is a copy of the class quiz_last_responses_table from Jean-Michel Vedrine
- * with some adaptations for proforma question options.
+ * It is derived from quiz_last_responses_table and add special handling for 
+ * the response column.
  *
  * @package   responsedownload
- * @copyright  2008 Jean-Michel Vedrine, 2020 Ostfalia Hochschule fuer angewandte Wissenschaften
+ * @copyright  2020 Ostfalia Hochschule fuer angewandte Wissenschaften
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class quiz_responsedownload_last_responses_table extends quiz_attempts_report_table {
-
-    /**
-     * The full question usage object for each try shown in report.
-     *
-     * @var question_usage_by_activity[]
-     */
-    private $questionusagesbyactivity;
+class quiz_responsedownload_last_responses_table extends quiz_last_responses_table {
 
     /**
      * Constructor.
@@ -127,36 +121,16 @@ class quiz_responsedownload_last_responses_table extends quiz_attempts_report_ta
     }
 
     public function build_table() {
-        if (!$this->rawdata) {
-            return;
-        }
-
-        // $result1 = xdebug_start_trace('xdebugtrace_build_table', 2);
-        
-        $this->strtimeformat = str_replace(',', ' ', get_string('strftimedatetime'));
-        // New (proforma): set references needed by export class.
+        // Set references needed by export class.
         if (isset($this->exportclass)) {
             $this->exportclass->set_db_columns($this->columns);
             $this->exportclass->set_table_object($this);
         }
+        // $result1 = xdebug_start_trace('xdebugtrace_build_table', 2);
         parent::build_table();
         // $result2 = xdebug_stop_trace();
     }
 
-    public function col_sumgrades($attempt) {
-        if ($attempt->state != quiz_attempt::FINISHED) {
-            return '-';
-        }
-
-        $grade = quiz_rescale_grade($attempt->sumgrades, $this->quiz);
-        if ($this->is_downloading()) {
-            return $grade;
-        }
-
-        $gradehtml = '<a href="review.php?q=' . $this->quiz->id . '&amp;attempt=' .
-                $attempt->attempt . '">' . $grade . '</a>';
-        return $gradehtml;
-    }
 
 
     public function data_col($slot, $field, $attempt) {
@@ -165,7 +139,7 @@ class quiz_responsedownload_last_responses_table extends quiz_attempts_report_ta
         }
 
         if ($field == 'response') {
-            // New (proforma): special handling for response column.
+            // New: special handling for response column.
             list ($editortext,  $files) = $this->field_from_extra_data($attempt, $slot, $field);
             if ($this->is_downloading()) {
                 // Pass to writer.
@@ -189,25 +163,8 @@ class quiz_responsedownload_last_responses_table extends quiz_attempts_report_ta
                 return $output;
             }
         } else {
-            $value = $this->field_from_extra_data($attempt, $slot, $field);
+            return parent::data_col($slot, $field, $attempt);
         }
-
-        if (is_null($value)) {
-            $summary = '-';
-        } else {
-            $summary = trim($value);
-        }
-
-        if ($this->is_downloading() && $this->is_downloading() != 'html') {
-            return $summary;
-        }
-        $summary = s($summary);
-
-        if ($this->is_downloading() || $field != 'responsesummary') {
-            return $summary;
-        }
-
-        return $this->make_review_link($summary, $attempt, $slot);
     }
 
     /**
@@ -220,7 +177,7 @@ class quiz_responsedownload_last_responses_table extends quiz_attempts_report_ta
      */
     protected function field_from_extra_data($attempt, $slot, $field) {
         if (!isset($this->lateststeps[$attempt->usageid][$slot])) {
-            // New (proforma): special handling for response column.
+            // New: special handling for response column.
             if ($field == 'response') {
                 // Special handling for response.
                 return array('', array());
@@ -233,7 +190,7 @@ class quiz_responsedownload_last_responses_table extends quiz_attempts_report_ta
         if (property_exists($stepdata, $field . 'full')) {
             $value = $stepdata->{$field . 'full'};
         } else {
-            // New (proforma): special handling for response column.
+            // New: special handling for response column.
             if ($field == 'response') {
                 // Special handling for response.
                 return $this->response_value($attempt, $slot);
@@ -245,57 +202,13 @@ class quiz_responsedownload_last_responses_table extends quiz_attempts_report_ta
     }
 
     public function other_cols($colname, $attempt) {
-        if (preg_match('/^question(\d+)$/', $colname, $matches)) {
-            return $this->data_col($matches[1], 'questionsummary', $attempt);
-
-        } else if (preg_match('/^response(\d+)$/', $colname, $matches)) {
-           // New (proforma): resturn response instead of response summary..
+        if (preg_match('/^response(\d+)$/', $colname, $matches)) {
+           // New: resturn response instead of response summary..
            return $this->data_col($matches[1], 'response', $attempt);
-
-        } else if (preg_match('/^right(\d+)$/', $colname, $matches)) {
-            return $this->data_col($matches[1], 'rightanswer', $attempt);
-
         } else {
-            return null;
+            return parent::other_cols($colname, $attempt);
         }
     }
-
-    protected function requires_extra_data() {
-        return true;
-    }
-
-    protected function is_latest_step_column($column) {
-        if (preg_match('/^(?:question|response|right)([0-9]+)/', $column, $matches)) {
-            return $matches[1];
-        }
-        return false;
-    }
-
-    /**
-     * Get any fields that might be needed when sorting on date for a particular slot.
-     * @param int    $slot  the slot for the column we want.
-     * @param string $alias the table alias for latest state information relating to that slot.
-     * @return string sql fragment to alias fields.
-     */
-    protected function get_required_latest_state_fields($slot, $alias) {
-        global $DB;
-        $sortableresponse = $DB->sql_order_by_text("{$alias}.questionsummary");
-        if ($sortableresponse === "{$alias}.questionsummary") {
-            // Can just order by text columns. No complexity needed.
-            return "{$alias}.questionsummary AS question{$slot},
-                    {$alias}.rightanswer AS right{$slot},
-                    {$alias}.responsesummary AS response{$slot}";
-        } else {
-            // Work-around required.
-            return $DB->sql_order_by_text("{$alias}.questionsummary") . " AS question{$slot},
-                    {$alias}.questionsummary AS question{$slot}full,
-                    " . $DB->sql_order_by_text("{$alias}.rightanswer") . " AS right{$slot},
-                    {$alias}.rightanswer AS right{$slot}full,
-                    " . $DB->sql_order_by_text("{$alias}.responsesummary") . " AS response{$slot},
-                    {$alias}.responsesummary AS response{$slot}full";
-        }
-    }
-
 
     // New functions.
 
@@ -366,24 +279,7 @@ class quiz_responsedownload_last_responses_table extends quiz_attempts_report_ta
                 $editortext = $answer;
             }
         }
-
-        /*
-        // Get file attachements.
-        // Check if attachments are allowed as response.
-        $response_file_areas = $qa->get_question()->qtype->response_file_areas();
-        $has_responsefilearea_attachments = in_array(ATTACHMENTS, $response_file_areas);
-
-        // Check if attempt has submitted any attachment.
-        $has_submitted_attachments = (isset($var_attachments));
-
-        // Get files.
-        if ($has_responsefilearea_attachments && $has_submitted_attachments) {
-            $quba_contextid = $quba->get_owning_context()->id;
-            $files = $qa->get_last_qt_files(ATTACHMENTS, $quba_contextid);
-        }
-        */
-        
-
+  
         unset($qa);
         // Force garbage collector to work because this function allocates a lot of memory.
         gc_collect_cycles();
@@ -456,31 +352,6 @@ class quiz_responsedownload_last_responses_table extends quiz_attempts_report_ta
             }
         }
         return $this->exportclass;
-    }
-
-    /**
-     * prefetch all questian usages in order to save memory
-     *
-     * @throws coding_exception
-     */
-    protected function load_extra_data() {
-        parent::load_extra_data();
-        /*
-        $qubaids = $this->get_qubaids_condition();
-        $dm = new question_engine_data_mapper();
-        $this->questionusagesbyactivity = $dm->load_questions_usages_by_activity($qubaids);
-        */
-    }
-
-    /**
-     * Return the question attempt object.
-     *
-     * @param int $questionusagesid
-     * @param int $slot
-     * @return question_attempt
-     */
-    protected function get_question_attempt($questionusagesid, $slot) {
-        return $this->questionusagesbyactivity[$questionusagesid]->get_question_attempt($slot);
     }
 }
 

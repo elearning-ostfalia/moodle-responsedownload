@@ -57,10 +57,19 @@ class table_zip_export_format extends table_dataformat_export_format {
         \core\session\manager::write_close();
     }
 
+    /**
+     * store column names for easier identification of colums
+     * @param type $columns
+     */
     public function set_db_columns($columns) {
         $this->dataformat->set_columns($columns);
     }
 
+    /**
+     * store table object to get options when creating archive
+     * 
+     * @param type $table
+     */
     public function set_table_object($table) { // Must not be named set_table due to name clash.
         $this->dataformat->set_table($table);
     }

@@ -16,7 +16,7 @@
 
 /**
  * Class to store the options for a {@link quiz_responsedownload}.
- * Parts of this code is copied from quiz_responses.
+ * Many parts of this code are copied from quiz_responses.
  *
  * @package   quiz_responsedownload
  * @copyright 2020 Ostfalia University of Applied Sciences, 2012 The Open University
