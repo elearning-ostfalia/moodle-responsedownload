@@ -35,5 +35,5 @@ function xmldb_quiz_responsedownload_install() {
     $record->name         = 'responsedownload';
     $record->displayorder = '9000';
 
-    $DB->insert_record('quiz_responsedownload', $record);
+    $DB->insert_record('quiz_reports', $record);
 }
