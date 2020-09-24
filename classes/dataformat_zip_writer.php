@@ -173,8 +173,8 @@ class dataformat_zip_writer extends \core\dataformat\base {
                 $username = $record[$this->columns['username']];                
             }
             
-            $attemptname = $record[$this->columns['lastname']] . '-' .
-                    $record[$this->columns['firstname']] . '-R' . $rownum;
+            $attemptname = 'R' . $rownum . '-' . $record[$this->columns['lastname']] . '-' .
+                    $record[$this->columns['firstname']];
             if (!empty($username)) {
                 $attemptname = $username . '-'. $attemptname;                
             }
