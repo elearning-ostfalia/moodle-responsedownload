@@ -107,8 +107,7 @@ class quiz_responsedownload_last_responses_table extends quiz_last_responses_tab
     protected $lastusageid = null;
     /* last question usage (cache)*/
     protected $lastquba = null;
-    
-    
+
     /**
      * Constructor.
      *
@@ -130,7 +129,7 @@ class quiz_responsedownload_last_responses_table extends quiz_last_responses_tab
     public function build_table() {
         $this->lastusageid = null;
         $this->lastquba = null;
-    
+
         if (!$this->rawdata) {
             return;
         }
@@ -139,15 +138,9 @@ class quiz_responsedownload_last_responses_table extends quiz_last_responses_tab
             $this->exportclass->set_db_columns($this->columns);
             $this->exportclass->set_table_object($this);
         }
-        
 
         $this->strtimeformat = '%F-%H-%M';
-        // $result1 = xdebug_start_trace('xdebugtrace_build_table', 2);
-        // Note that we must call the build_table of grandparent because otherwise we cannot
-        // change the timestamp format.
         quiz_attempts_report_table::build_table();
-        // $result2 = xdebug_stop_trace();
-        // Modify timestamp format for technical output.
     }
 
 
@@ -248,8 +241,8 @@ class quiz_responsedownload_last_responses_table extends quiz_last_responses_tab
         // Assume only one key in each array is used per question.
         $answerkeys = array('answer');
         $attachmentkeys = array('attachments');
-        
-        // Get question usage
+
+        // Get question usage.
         if ($attempt->usageid == $this->lastusageid) {
             // Get cached question usage.
             $quba = $this->lastquba;
@@ -263,7 +256,6 @@ class quiz_responsedownload_last_responses_table extends quiz_last_responses_tab
         $qubacontextid = $quba->get_owning_context()->id;
         $qa = $quba->get_question_attempt($slot);
         unset($quba);
-       
 
         // Preset return values.
         $files = array();
@@ -284,7 +276,6 @@ class quiz_responsedownload_last_responses_table extends quiz_last_responses_tab
             }
             foreach ($attachmentkeys as $key) {
                 if (isset($qtdata[$key])) {
-                    // $attachments = $qtdata[$key];
                     $files = $step->get_qt_files($key, $qubacontextid);
                 }
             }
@@ -294,7 +285,6 @@ class quiz_responsedownload_last_responses_table extends quiz_last_responses_tab
                 $answer = $qa->get_last_qt_var($key);
             }
             foreach ($attachmentkeys as $key) {
-                // $attachments = $qa->get_last_qt_var($key);
                 $files = $qa->get_last_qt_files($key, $qubacontextid);
             }
         }
