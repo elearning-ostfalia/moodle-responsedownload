@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Privacy Subsystem implementation for qtype_proforma.
+ * Privacy Subsystem implementation for quiz_responsedownload.
  *
  * @package    quiz_responsedownload
  * @copyright  2019 Ostfalia Hochschule fuer angewandte Wissenschaften

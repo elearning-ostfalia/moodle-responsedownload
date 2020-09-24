@@ -24,7 +24,7 @@
 
 $string['responsedownload'] = 'Download responses';
 $string['pluginname'] = 'Download responses';
-$string['plugindescription'] = 'Download files/text responses submitted by all students (all attempts) in response to quiz proforma questions.<br><br>';
+$string['plugindescription'] = 'Download files/text responses submitted by students in response to quiz essay or proforma questions.<br><br>';
 
 $string['options'] = 'Download format options';
 

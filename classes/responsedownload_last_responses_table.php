@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file defines the quiz proforma responses table.
+ * This file defines the quiz responsedownload table.
  *
  * @package   quiz_responsedownload
  * @copyright 2008 Jean-Michel Vedrine, 2020 Ostfalia Hochschule fuer angewandte Wissenschaften
@@ -91,15 +91,15 @@ class question_attempt_steps_with_submitted_response_2_iterator extends question
 }
 
 /**
- * This is a table subclass for downloading the proforma responses.
+ * This is a table subclass for downloading the responses.
  * It is a copy of the class quiz_last_responses_table from Jean-Michel Vedrine
- * with some adaptations due to proforma question options.
+ * with some adaptations for proforma question options.
  *
  * @package   responsedownload
  * @copyright  2008 Jean-Michel Vedrine, 2020 Ostfalia Hochschule fuer angewandte Wissenschaften
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class quiz_proforma_last_responses_table extends quiz_attempts_report_table {
+class quiz_responsedownload_last_responses_table extends quiz_attempts_report_table {
 
     /**
      * The full question usage object for each try shown in report.
@@ -122,7 +122,7 @@ class quiz_proforma_last_responses_table extends quiz_attempts_report_table {
      */
     public function __construct($quiz, $context, $qmsubselect, quiz_responsedownload_options $options,
             \core\dml\sql_join $groupstudentsjoins, \core\dml\sql_join $studentsjoins, $questions, $reporturl) {
-        parent::__construct('mod-quiz-report-proforma-submission-export', $quiz, $context,
+        parent::__construct('mod-quiz-responsedownload', $quiz, $context,
                 $qmsubselect, $options, $groupstudentsjoins, $studentsjoins, $questions, $reporturl);
     }
 

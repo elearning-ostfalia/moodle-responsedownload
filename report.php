@@ -37,7 +37,7 @@ require_once($CFG->dirroot . '/mod/quiz/report/responsedownload/classes/response
  * Quiz report subclass for the responsedownload report.
  *
  * This report allows you to download editor responses and file attachments submitted
- * by students as a response to quiz proforma questions.
+ * by students as a response to quiz questions.
  *
  * @copyright 2020 Ostfalia, 1999 onwards Martin Dougiamas and others {@link http://moodle.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -66,9 +66,9 @@ class quiz_responsedownload_report extends quiz_attempts_report {
         $courseshortname = format_string($course->shortname, true,
                 array('context' => context_course::instance($course->id)));
         if ($options->whichtries === question_attempt::LAST_TRY) {
-            $tableclassname = 'quiz_proforma_last_responses_table';
+            $tableclassname = 'quiz_responsedownload_last_responses_table';
         } else {
-            $tableclassname = 'quiz_proforma_first_or_all_responses_table';
+            $tableclassname = 'quiz_responsedownload_first_or_all_responses_table';
         }
         $table = new $tableclassname($quiz, $this->context, $this->qmsubselect,
                 $options, $groupstudentsjoins, $studentsjoins, $questions, $options->get_url());

@@ -34,7 +34,7 @@ defined('MOODLE_INTERNAL') || die();
  * @author    Jamie Pratt <me@jamiep.org>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class quiz_proforma_first_or_all_responses_table extends quiz_proforma_last_responses_table /* quiz_last_responses_table*/  {
+class quiz_responsedownload_first_or_all_responses_table extends quiz_responsedownload_last_responses_table /* quiz_last_responses_table*/  {
 
     /**
      * The full question usage object for each try shown in report.
