@@ -122,14 +122,24 @@ class quiz_responsedownload_last_responses_table extends quiz_last_responses_tab
     }
 
     public function build_table() {
+        if (!$this->rawdata) {
+            return;
+        }
         // Set references needed by export class.
         if (isset($this->exportclass)) {
             $this->exportclass->set_db_columns($this->columns);
             $this->exportclass->set_table_object($this);
         }
+        
+
+        $this->strtimeformat = '%F-%H-%M';
+        // $this->strtimeformat = '%Y-%m-%d-%H-%M';
         // $result1 = xdebug_start_trace('xdebugtrace_build_table', 2);
-        parent::build_table();
+        // Note that we must call the build_table of grandparent because otherwise we cannot
+        // change the timestamp format.
+        quiz_attempts_report_table::build_table();
         // $result2 = xdebug_stop_trace();
+        // Modify timestamp format for technical output.
     }
 
 

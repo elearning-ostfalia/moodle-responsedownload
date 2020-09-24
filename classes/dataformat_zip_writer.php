@@ -94,7 +94,7 @@ class dataformat_zip_writer extends \core\dataformat\base {
 
     /**
      * write stored file to zip archive
-     * (function is copied from zip_packer, original is private)
+     * (function is copied from zip_packer because it is private)
      * @param type $ziparch
      * @param type $archivepath
      * @param type $file
@@ -175,6 +175,10 @@ class dataformat_zip_writer extends \core\dataformat\base {
                 default:
                     throw new coding_exception('folders option not supported ' . $options->folders);
             }
+            $timefinish = $record[$this->columns['timefinish']]; 
+            $archivepath .= ' ' . $timefinish;
+            // 'timestart'
+            
             $archivepath = trim($archivepath, '/') . '/';
 
             if (is_string($editortext)) {
