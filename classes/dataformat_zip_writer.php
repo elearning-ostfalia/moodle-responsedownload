@@ -22,7 +22,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/mod/quiz/report/responsedownload/classes/responsedownload_options.php');
@@ -146,7 +145,7 @@ class dataformat_zip_writer extends \core\dataformat\base {
         if (count($record) != count($this->columns)) {
             throw new coding_exception('number of columns does not match row size');
         }
-        
+
         $q = 1; // Question number.
         while (isset($this->columns['response' . $q])) {
             // Response value will be an array with editor response or file list.
@@ -167,16 +166,16 @@ class dataformat_zip_writer extends \core\dataformat\base {
 
             // Create pathname.
             if (array_key_exists('username', $this->columns)) {
-                // The username field is only available if set in the config.php
+                // The username field is only available if set in the config.php, e.g.
                 // $CFG->showuseridentity = 'username';
-                // and if the user has the capability 'moodle/site:viewuseridentity'
-                $username = $record[$this->columns['username']];                
+                // and if the user has the capability 'moodle/site:viewuseridentity'.
+                $username = $record[$this->columns['username']];
             }
-            
+
             $attemptname = 'R' . $rownum . '-' . $record[$this->columns['lastname']] . '-' .
                     $record[$this->columns['firstname']];
             if (!empty($username)) {
-                $attemptname = $username . '-'. $attemptname;                
+                $attemptname = $username . '-'. $attemptname;
             }
             switch ($options->folders) {
                 case quiz_responsedownload_options::QUESTION_WISE:
@@ -188,10 +187,12 @@ class dataformat_zip_writer extends \core\dataformat\base {
                 default:
                     throw new coding_exception('folders option not supported ' . $options->folders);
             }
-            $timefinish = $record[$this->columns['timefinish']]; 
-            $archivepath .= ' ' . $timefinish;
-            // 'timestart'
-            
+            // Append timefinish as extra information (may be empty).
+            $timefinish = $record[$this->columns['timefinish']];
+            if (!empty($timefinish)) {
+                $archivepath .= ' ' . $timefinish;
+            }
+
             $archivepath = trim($archivepath, '/') . '/';
 
             if (is_string($editortext)) {
