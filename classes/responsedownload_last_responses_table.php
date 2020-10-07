@@ -230,6 +230,72 @@ class quiz_responsedownload_last_responses_table extends quiz_last_responses_tab
     }
 
     /**
+     * same as 
+     * question_engine_data_mapper::load_questions_usage_by_activity 
+     * but without actually reading feedback which may allocate too much memory.
+     * 
+     * @global type $DB
+     * @param type $qubaid
+     * @return type
+     * @throws coding_exception
+     */
+    protected function my_load_questions_usage_by_activity($qubaid) {
+        GLOBAL $DB;
+        $records = $DB->get_recordset_sql("
+SELECT
+    quba.id AS qubaid,
+    quba.contextid,
+    quba.component,
+    quba.preferredbehaviour,
+    qa.id AS questionattemptid,
+    qa.questionusageid,
+    qa.slot,
+    qa.behaviour,
+    qa.questionid,
+    qa.variant,
+    qa.maxmark,
+    qa.minfraction,
+    qa.maxfraction,
+    qa.flagged,
+    qa.questionsummary,
+    qa.rightanswer,
+    qa.responsesummary,
+    qa.timemodified,
+    qas.id AS attemptstepid,
+    qas.sequencenumber,
+    qas.state,
+    qas.fraction,
+    qas.timecreated,
+    qas.userid,
+    qasd.name,
+    CASE 
+        WHEN qasd.name ='_feedback' THEN 'XXX' 
+        ELSE qasd.value
+    END as value
+FROM      {question_usages}            quba
+LEFT JOIN {question_attempts}          qa   ON qa.questionusageid    = quba.id
+LEFT JOIN {question_attempt_steps}     qas  ON qas.questionattemptid = qa.id
+LEFT JOIN {question_attempt_step_data} qasd ON qasd.attemptstepid    = qas.id
+
+WHERE
+    quba.id = :qubaid
+
+ORDER BY
+    qa.slot,
+    qas.sequencenumber
+    ", array('qubaid' => $qubaid));
+
+        if (!$records->valid()) {
+            throw new coding_exception('Failed to load questions_usage_by_activity ' . $qubaid);
+        }
+
+        $quba = question_usage_by_activity::load_from_records($records, $qubaid);
+        $records->close();
+
+        return $quba;
+    }    
+    
+    /**
      * retrieves the student response from editor or file upload
      * @param type $attempt
      * @param type $slot
@@ -246,10 +312,10 @@ class quiz_responsedownload_last_responses_table extends quiz_last_responses_tab
         if ($attempt->usageid == $this->lastusageid) {
             // Get cached question usage.
             $quba = $this->lastquba;
-        } else {
+        } else {       
+            unset($this->lastquba);       
             // Get question usage from database.
-            $dm = new question_engine_data_mapper();
-            $quba = $dm->load_questions_usage_by_activity($attempt->usageid);
+            $quba = $this->my_load_questions_usage_by_activity($attempt->usageid);
             $this->lastusageid = $attempt->usageid;
             $this->lastquba = $quba;
         }
@@ -301,7 +367,7 @@ class quiz_responsedownload_last_responses_table extends quiz_last_responses_tab
         }
 
         unset($qa);
-        // Force garbage collector to work because this function allocates a lot of memory.
+        // Force garbage collector to run because this function allocates a lot of memory.
         gc_collect_cycles();
         return array ($editortext, $files);
     }
