@@ -56,6 +56,8 @@ class dataformat_zip_writer extends \core\dataformat\base {
     /** @var null table object to get data from */
     protected $table = null;
 
+
+
     /**
      * Constructor
      */
@@ -77,6 +79,7 @@ class dataformat_zip_writer extends \core\dataformat\base {
      */
     public function set_table($table) {
         $this->table = $table;
+
     }
 
     /**
@@ -146,18 +149,30 @@ class dataformat_zip_writer extends \core\dataformat\base {
             throw new coding_exception('number of columns does not match row size');
         }
 
-        $q = 1; // Question number.
-        while (isset($this->columns['response' . $q])) {
-            // Response value will be an array with editor response or file list.
-            list($editortext, $files) = $record[$this->columns['response' . $q]];
+        $keys = array_keys($this->table->get_questions());
+        // Hack: For some unknown reason the array may start at index != 1.
+        // So we change base index to 1:
+        $offset = $keys[0] - 1;
+        $i = 0;
+        $newkeys = array();
+        while ($i < count($keys)) {
+            $newkeys[$i] = $keys[$i] - $offset;
+            $i++;
+        }
 
-            $questionname = 'Q' . $q;
+        $q = 0; // Question number.
+        while ($q < count($keys)) { // isset($keys[$q]) && isset($this->columns['response' . $keys[$q]])) {
+            // Response value will be an array with editor response or file list.
+            $index = $this->columns['response' . $keys[$q]];
+            list($editortext, $files) = $record[$index];
+
+            $questionname = 'Q' . $newkeys[$q];
 
             // Archive question text.
             if ($options->showqtext) {
-                $questiontext = $record[$this->columns['question' . $q]];
+                $questiontext = $record[$this->columns['question' . $keys[$q]]];
                 if (!$this->ziparch->add_file_from_string($questionname . '/Questiontext.html', $questiontext)) {
-                    debugging("Can not zip '$responsefile' file", DEBUG_DEVELOPER);
+                    debugging("Can not zip '.$questionname . '/Questiontext.html' .' file", DEBUG_DEVELOPER);
                     if (!$this->ignoreinvalidfiles) {
                         $this->abort = true;
                     }
@@ -205,7 +220,7 @@ class dataformat_zip_writer extends \core\dataformat\base {
                     case quiz_responsedownload_options::NAME_FROM_QUESTION_WITH_PATH:
                     case quiz_responsedownload_options::NAME_FROM_QUESTION_WO_PATH:
                         $questions = $this->table->get_questions();
-                        $question = $questions[$q];
+                        $question = $questions[$keys[$q]];
                         if (isset ($question->options) && isset($question->options->responsefilename)) {
                             $responsefile = $question->options->responsefilename;
                         }
