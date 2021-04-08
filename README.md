@@ -27,8 +27,12 @@ be prepended to the student name.
 #### Design
 
 The code uses many parts of the quiz_responses plugin which is part of Moodle core 
-(version 3.8.4). 
-The quiz_responses classes used are copied in order to avoid problems with interface changes in the future.
+(version 3.9.6). 
+The original quiz_responses classes used are copied in order to avoid problems with interface changes in the future.
+
+    mod\quiz\report\responses\last_responses_table.php
+    mod\quiz\report\responses\first_or_all_responses_table.php
+
 Changes to those base classes are mostly done in seperate and inherited classes (polymorphism). 
 This avoids mixing the code.
 
