@@ -2,7 +2,7 @@
 
 #### Moodle Quiz Report Plugin for downloading Quiz responses as zip file. 
 
-This plugin is a modification of the Moodle core quiz response report (base version 3.8.4). 
+This plugin is a modification of the Moodle core quiz response report (base version 3.9.6). 
 
 It allows teachers to download the student responses packed as a zip archive. 
 It focuses on question types that require the student to enter text in an editor or to upload files: 
@@ -26,8 +26,7 @@ be prepended to the student name.
 
 #### Design
 
-The code uses many parts of the quiz_responses plugin which is part of Moodle core 
-(version 3.9.6). 
+The code uses many parts of the quiz_responses plugin which is part of Moodle core. 
 The original quiz_responses classes used are copied in order to avoid problems with interface changes in the future.
 
     mod\quiz\report\responses\last_responses_table.php
