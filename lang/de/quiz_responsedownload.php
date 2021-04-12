@@ -23,7 +23,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['responsedownload'] = 'Herunterladen von Text/Datei-Abgaben';
+$string['responsedownload'] = 'Text/Datei-Abgaben herunterladen';
 $string['pluginname'] = ' Herunterladen von Abgaben';
 $string['plugindescription'] = 'Herunterladen der Text/Datei-Abgaben, insbesondere für Freitext- und ProFormA-Aufgabemn.<br><br>';
 

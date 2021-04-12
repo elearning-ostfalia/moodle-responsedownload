@@ -22,7 +22,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['responsedownload'] = 'Download responses';
+$string['responsedownload'] = 'Download text responses';
 $string['pluginname'] = 'Download responses';
 $string['plugindescription'] = 'Download files/text responses submitted by students in response to quiz essay or proforma questions.<br><br>';
 
