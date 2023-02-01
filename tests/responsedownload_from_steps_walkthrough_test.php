@@ -26,6 +26,9 @@ require_once($CFG->dirroot . '/mod/quiz/tests/attempt_walkthrough_from_csv_test.
 require_once($CFG->dirroot . '/mod/quiz/report/default.php');
 require_once($CFG->dirroot . '/mod/quiz/report/statistics/report.php');
 require_once($CFG->dirroot . '/mod/quiz/report/reportlib.php');
+require_once($CFG->dirroot . '/mod/quiz/report/attemptsreport.php');
+require_once($CFG->dirroot . '/mod/quiz/report/responsedownload/report.php');
+
 
 /**
  * Quiz attempt walk through using data from csv file.
@@ -196,6 +199,65 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
             }
             $this->assert_response_test($quizattemptids[$responses['quizattempt']], $responses);
         }
+
+        // Prepare check.
+        $report = new \quiz_responsedownload_report();
+        // call of protected method $report->download_proforma_submissions
+        $r = new \ReflectionMethod('\quiz_responsedownload_report', 'create_table');
+        $r->setAccessible(true);
+        $init = new \ReflectionMethod('\quiz_responsedownload_report', 'init');
+        $init->setAccessible(true);
+        global $DB;
+        $course = $DB->get_record('course', array('id' => $this->quiz->course));
+        $cm = \get_coursemodule_from_instance("quiz", $this->quiz->id, $course->id);
+        $context = \context_module::instance($cm->id);
+
+        // Possible combinations.
+        $showqtexts = [0, 1];
+        $attempts = [
+            \quiz_attempts_report::ALL_WITH,
+//            \quiz_attempts_report::ENROLLED_WITH,
+//            \quiz_attempts_report::ENROLLED_WITHOUT,
+//            \quiz_attempts_report::ENROLLED_ALL,
+        ];
+        $whichtries = [
+            \question_attempt::LAST_TRY,
+//            \question_attempt::FIRST_TRY,
+//            \question_attempt::ALL_TRIES
+        ];
+        foreach ($whichtries as $whichtry) {
+            foreach ($showqtexts as $showqtext) {
+                foreach ($attempts as $attempt) {
+                    // Default initialisation.
+                    list($currentgroup, $studentsjoins, $groupstudentsjoins, $allowedjoins) = $init->invoke($report,
+                        'responsedownload', 'quiz_responsedownload_settings_form', $this->quiz, $cm, $course);
+
+                    $qmsubselect = quiz_report_qm_filter_select($this->quiz);
+
+                    $options = new \quiz_responsedownload_options('responsedownload', $this->quiz, $cm, $course);
+                    $options->attempts = $attempt;
+                    $options->showqtext = $showqtext;
+                    $options->whichtries = $whichtry;
+                    $options->download = false;
+
+                    if ($options->whichtries === \question_attempt::LAST_TRY) {
+                        $tableclassname = 'quiz_responsedownload_last_responses_table';
+                    } else {
+                        $tableclassname = 'quiz_responsedownload_first_or_all_responses_table';
+                    }
+
+                    // Load the required questions.
+                    $questions = $report->load_fullquestions($this->quiz);
+
+                    $table = new $tableclassname($this->quiz, $context, $qmsubselect,
+                        $options, $groupstudentsjoins, $studentsjoins, $questions, $options->get_url());
+                    // Create zip.
+                    $filenamearchive = $r->invoke($report, $table, $questions, $this->quiz, $options, $allowedjoins);
+
+                }
+            }
+        }
+
     }
 
     protected function assert_response_test($quizattemptid, $responses) {
