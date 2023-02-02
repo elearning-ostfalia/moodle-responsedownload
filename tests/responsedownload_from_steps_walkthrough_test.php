@@ -289,7 +289,7 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
         }
 
         $this->assertNotEquals(0, count($header));
-        print_r($header);
+        // print_r($header);
 
         // Evaluate body fields.
         $body = $xpath->query("//table[@id='responses']/tbody/tr");
@@ -307,62 +307,66 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
                 if ($pos !== false) {
                     $content = substr($content, 0, $pos);
                 }
-                $row[$col] = $content;
+                $row[$col] = trim($content);
             }
+            // if ($row[1] != ' ' and $row[1] != '') {
+            // There are empty rows at the end.
             $rows[] = $row;
+            // }
         }
         $this->assertNotEquals(0, count($rows));
-        print_r($rows);
-        // TODO
-        return;
-
-//        $archive = new \ZipArchive();
-//        $archive->open($filenamearchive);
-        $countMatches = 0; // count number of matching files.
-        $countSteps = 0;
+        // var_dump($rows);
 
         foreach ($csvdata['steps'] as $stepsfromcsv) {
             $steps = $this->explode_dot_separated_keys_to_make_subindexs($stepsfromcsv);
+            print_r($steps);
+            $this->assertTrue($this->find_responses($steps, $rows, $options));
+        }
+    }
 
-            foreach ($steps['responses'] as $index => $answer) {
+    protected function find_responses($steps, $rows, $options) {
+        $name = $steps['firstname'] . ' ' . $steps['lastname'];
 
+        foreach ($rows as $row) {
+            // Check name.
+            if ($row[1] != $name) {
+                continue;
+            }
+
+            foreach ($steps['responses'] as $index => $response) {
                 switch ($this->slots[$index]->options->responseformat) {
                     case 'editor':
-//                        if ('noeditor' != $editorfilename) {
-                            $countSteps++;
-                            if (!$this->find_answer($steps, $index, $answer, $output, $options)) {
-                                $countMatches++;
+                        $found = false;
+                        foreach ($row as $col) {
+                            if ($col != $response['answer']) {
+                                continue;
                             }
-  //                      }
+                            $found = true;
+                        }
+                        $this->assertTrue($found);
                         break;
                     case 'filepicker':
                     case 'explorer':
-                        $countSteps++;
+                        $found = false;
+                        foreach ($row as $col) {
+                            if (!$col->starts_with('Files:')) {
+                                // TODO: check further detail of file.
+                                continue;
+                            }
+                            $found = true;
+                        }
+                        $this->assertTrue($found);
                         break;
                     default:
-                        throw new \coding_exception('invalid proforma subtype ' . $this->slots[$index]->options->responseformat);
+                        throw new \coding_exception('invalid proforma subtype ' .
+                            $this->slots[$index]->options->responseformat);
                 }
-
-                if ($this->find_answer($steps, $index, $answer, $output, $options)) {
-                    $countMatches++;
-                    // $this->assertEquals($options->questiontext, $this->find_questiontext($steps, $index, $answer, $output, $options, $this->slots[$index]));
-                }
+                $countSteps++;
             }
+
         }
 
-        $this->assertEquals($countSteps, $countMatches);
-        // Note: Two attempts come from qtype_proforma - Test helper
-        $this->assertTrue($archive->numFiles >= $countMatches);
-        /*
-                for ($i = 0; $i < $archive->numFiles; $i++) {
-                    $filename = $archive->getNameIndex($i);
-                    $filecontent = $archive->getFromName($filename);
-                    // Dump first file name and content.
-                    var_dump($filename);
-                    var_dump($filecontent);
-                    break;
-                }
-        */
+        return false;
     }
 
 
