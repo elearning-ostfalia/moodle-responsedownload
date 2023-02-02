@@ -252,13 +252,119 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
                     $table = new $tableclassname($this->quiz, $context, $qmsubselect,
                         $options, $groupstudentsjoins, $studentsjoins, $questions, $options->get_url());
                     // Create zip.
-                    $filenamearchive = $r->invoke($report, $table, $questions, $this->quiz, $options, $allowedjoins);
+                    ob_start();
+                    $r->invoke($report, $table, $questions, $this->quiz, $options, $allowedjoins);
+                    $output = ob_get_contents();
+                    ob_end_clean();
+                    $this->checkHtml($output, $csvdata, $options);
+                    break;
+                }
+            }
+        }
+    }
 
+    protected function checkHtml($output, $csvdata, $options): void {
+        // print_r($output);
+        $doc = new \DOMDocument();
+        $doc->loadHTML($output);
+        $xpath = new \DOMXpath($doc);
+
+        // Evaluate header columns.
+        $headercol = $xpath->query("//table[@id='responses']/thead/tr/th/a[@data-sortby]");
+        $header = [];
+        $counter = 0;
+        foreach ($headercol as $col) {
+            switch ($col->getAttribute('data-sortby')) {
+                case 'firstname':
+                    $header[$counter] = 'name';
+                    $counter++;
+                    break;
+                case 'lastname':
+                    break;
+                default:
+                    $header[$counter] = $col->getAttribute('data-sortby');
+                    $counter++;
+                    break;
+            }
+        }
+
+        $this->assertNotEquals(0, count($header));
+        print_r($header);
+
+        // Evaluate body fields.
+        $body = $xpath->query("//table[@id='responses']/tbody/tr");
+        $rows = [];
+        foreach ($body as $bodyrow) {
+            $row = [];
+            foreach ($bodyrow->childNodes as $child) {
+                $classes = explode(' ', $child->getAttribute('class'));
+                $col = array_filter($classes, function($x) { return str_starts_with($x, 'c') and $x != 'cell'; });
+                $this->assertEquals(1, count($col));
+                $col = reset($col);
+                $col = substr($col, 1);
+                $content = $child->textContent;
+                $pos = strpos($content, 'Review attempt');
+                if ($pos !== false) {
+                    $content = substr($content, 0, $pos);
+                }
+                $row[$col] = $content;
+            }
+            $rows[] = $row;
+        }
+        $this->assertNotEquals(0, count($rows));
+        print_r($rows);
+        // TODO
+        return;
+
+//        $archive = new \ZipArchive();
+//        $archive->open($filenamearchive);
+        $countMatches = 0; // count number of matching files.
+        $countSteps = 0;
+
+        foreach ($csvdata['steps'] as $stepsfromcsv) {
+            $steps = $this->explode_dot_separated_keys_to_make_subindexs($stepsfromcsv);
+
+            foreach ($steps['responses'] as $index => $answer) {
+
+                switch ($this->slots[$index]->options->responseformat) {
+                    case 'editor':
+//                        if ('noeditor' != $editorfilename) {
+                            $countSteps++;
+                            if (!$this->find_answer($steps, $index, $answer, $output, $options)) {
+                                $countMatches++;
+                            }
+  //                      }
+                        break;
+                    case 'filepicker':
+                    case 'explorer':
+                        $countSteps++;
+                        break;
+                    default:
+                        throw new \coding_exception('invalid proforma subtype ' . $this->slots[$index]->options->responseformat);
+                }
+
+                if ($this->find_answer($steps, $index, $answer, $output, $options)) {
+                    $countMatches++;
+                    // $this->assertEquals($options->questiontext, $this->find_questiontext($steps, $index, $answer, $output, $options, $this->slots[$index]));
                 }
             }
         }
 
+        $this->assertEquals($countSteps, $countMatches);
+        // Note: Two attempts come from qtype_proforma - Test helper
+        $this->assertTrue($archive->numFiles >= $countMatches);
+        /*
+                for ($i = 0; $i < $archive->numFiles; $i++) {
+                    $filename = $archive->getNameIndex($i);
+                    $filecontent = $archive->getFromName($filename);
+                    // Dump first file name and content.
+                    var_dump($filename);
+                    var_dump($filecontent);
+                    break;
+                }
+        */
     }
+
 
     protected function assert_response_test($quizattemptid, $responses) {
         $quizattempt = quiz_attempt::create($quizattemptid);
