@@ -318,16 +318,16 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
             // }
         }
         $this->assertNotEquals(0, count($rows));
-        // var_dump($rows);
+        var_dump($rows);
 
         foreach ($csvdata['steps'] as $stepsfromcsv) {
             $steps = $this->explode_dot_separated_keys_to_make_subindexs($stepsfromcsv);
             print_r($steps);
-            $this->assertTrue($this->find_responses($steps, $rows, $options));
+            $this->assertTrue($this->find_responses($steps, $rows, $options, $header));
         }
     }
 
-    protected function find_responses($steps, $rows, $options) {
+    protected function find_responses($steps, $rows, $options, $header) {
         $name = $steps['firstname'] . ' ' . $steps['lastname'];
 
         foreach ($rows as $row) {
@@ -352,7 +352,7 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
                         break;
                     case 'filepicker':
                     case 'explorer':
-                        foreach ($row as $col) {
+                        foreach ($row as $colindex => $col) {
                             if (strpos($col, 'Files:') === false) {
                                 continue;
                             }
@@ -370,6 +370,9 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
                             $user = $this->users[$matches[1]];
                             $this->assertEquals($steps['lastname'], $user->lastname);
                             $this->assertEquals($steps['firstname'], $user->firstname);
+                            $headercol = $header[$colindex];
+                            $this->assertEquals(1, preg_match('/response(\d+)/i', $headercol, $matches));
+                            $this->assertEquals($matches[1], $index);
                             $found = true;
                             break;
                         }
