@@ -334,34 +334,32 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
             }
 
             foreach ($steps['responses'] as $index => $response) {
+                $found = false;
                 switch ($this->slots[$index]->options->responseformat) {
                     case 'editor':
-                        $found = false;
                         foreach ($row as $col) {
                             if ($col != $response['answer']) {
                                 continue;
                             }
                             $found = true;
                         }
-                        $this->assertTrue($found);
                         break;
                     case 'filepicker':
                     case 'explorer':
-                        $found = false;
                         foreach ($row as $col) {
-                            if (!$col->starts_with('Files:')) {
+                            if (strpos($col, 'Files:') === 0) {
                                 // TODO: check further detail of file.
                                 continue;
                             }
                             $found = true;
                         }
-                        $this->assertTrue($found);
                         break;
                     default:
                         throw new \coding_exception('invalid proforma subtype ' .
                             $this->slots[$index]->options->responseformat);
                 }
-                $countSteps++;
+                $this->assertTrue($found);
+                return true;
             }
 
         }
