@@ -46,6 +46,7 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
     }
 
     protected $files = array('questions', 'steps', 'responses');
+    protected $users = [];
 
     /**
      * Helper method: Store a test file with a given name and contents in a
@@ -56,7 +57,7 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
      * @param string $contents file contents.
      * @param string $filename filename.
      */
-    protected function upload_file($context, $draftitemid, $contents, $filename = 'MyString.java') {
+    protected function upload_file($context, $draftitemid, $contents, $filename) {
         $fs = get_file_storage();
 
         $filerecord = new \stdClass();
@@ -88,6 +89,7 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
 
             if (!$user = $DB->get_record('user', $username)) {
                 $user = $this->getDataGenerator()->create_user($username);
+                $this->users[$user->id] = $user;
             }
 
             global $USER;
@@ -118,7 +120,8 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
                                 case 'explorer':
                                     $attachementsdraftid = file_get_unused_draft_itemid();
                                     $response['attachments'] = $this->upload_file($usercontext
-                                        /*$quizobj->get_context()*/, $attachementsdraftid, $response['answer']);
+                                        /*$quizobj->get_context()*/, $attachementsdraftid, $response['answer'],
+                                        'response_' . $user->id. '_' . $slot . '.java');
                                     unset($response['answer']);
                                     break;
                                 default:
@@ -328,11 +331,13 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
         $name = $steps['firstname'] . ' ' . $steps['lastname'];
 
         foreach ($rows as $row) {
-            // Check name.
+            // Check user name.
             if ($row[1] != $name) {
                 continue;
             }
 
+            $userid = 'user';
+            // Check all responses:
             foreach ($steps['responses'] as $index => $response) {
                 $found = false;
                 switch ($this->slots[$index]->options->responseformat) {
@@ -342,16 +347,31 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
                                 continue;
                             }
                             $found = true;
+                            break;
                         }
                         break;
                     case 'filepicker':
                     case 'explorer':
                         foreach ($row as $col) {
-                            if (strpos($col, 'Files:') === 0) {
-                                // TODO: check further detail of file.
+                            if (strpos($col, 'Files:') === false) {
                                 continue;
                             }
+                            // Check if response belongs to user.
+                            $pattern = "/Files: response_(\d+)_" . $index . ".java/i";
+                            $matches = [];
+                            if (!preg_match($pattern, $col, $matches)) {
+/*                                echo 'File does not match:' . PHP_EOL;
+                                var_dump($col);
+                                var_dump($pattern);*/
+                                continue;
+                            }
+                            $this->assertEquals(1, preg_match($pattern, $col, $matches));
+
+                            $user = $this->users[$matches[1]];
+                            $this->assertEquals($steps['lastname'], $user->lastname);
+                            $this->assertEquals($steps['firstname'], $user->firstname);
                             $found = true;
+                            break;
                         }
                         break;
                     default:
@@ -359,9 +379,8 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
                             $this->slots[$index]->options->responseformat);
                 }
                 $this->assertTrue($found);
-                return true;
             }
-
+            return true;
         }
 
         return false;
