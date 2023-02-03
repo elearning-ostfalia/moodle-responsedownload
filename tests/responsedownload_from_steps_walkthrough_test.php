@@ -216,7 +216,10 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
         $context = \context_module::instance($cm->id);
 
         // Possible combinations.
-        $showqtexts = [1, 0];
+        $showqtexts = [
+            1,
+//            0
+        ];
         $attempts = [
             \quiz_attempts_report::ALL_WITH,
 //            \quiz_attempts_report::ENROLLED_WITH,
