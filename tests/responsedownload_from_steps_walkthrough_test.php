@@ -216,7 +216,7 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
         $context = \context_module::instance($cm->id);
 
         // Possible combinations.
-        $showqtexts = [0, 1];
+        $showqtexts = [1, 0];
         $attempts = [
             \quiz_attempts_report::ALL_WITH,
 //            \quiz_attempts_report::ENROLLED_WITH,
@@ -318,7 +318,17 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
             // }
         }
         $this->assertNotEquals(0, count($rows));
-        var_dump($rows);
+        // var_dump($rows);
+
+        // Check all question texts if available:
+        $options->questionindex = [];
+        if ($options->showqtext) {
+            foreach ($header as $colindex => $headercol) {
+                if (preg_match('/question(\d+)/i', $headercol, $matches)) {
+                    $options->questionindex[$matches[1]] = $colindex;
+                }
+            }
+        }
 
         foreach ($csvdata['steps'] as $stepsfromcsv) {
             $steps = $this->explode_dot_separated_keys_to_make_subindexs($stepsfromcsv);
@@ -330,13 +340,23 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
     protected function find_responses($steps, $rows, $options, $header) {
         $name = $steps['firstname'] . ' ' . $steps['lastname'];
 
+
+
         foreach ($rows as $row) {
             // Check user name.
             if ($row[1] != $name) {
                 continue;
             }
 
-            $userid = 'user';
+            // Check question text if available
+            if ($options->showqtext) {
+                foreach ($options->questionindex as $slot => $qindex) {
+                    // Convert German Umlauts.
+                    $questiontext = mb_convert_encoding($row[$qindex], 'ISO-8859-1', 'UTF-8');
+                    $this->assertEquals($this->slots[$slot]->questiontext, $questiontext);
+                }
+            }
+
             // Check all responses:
             foreach ($steps['responses'] as $index => $response) {
                 $found = false;
