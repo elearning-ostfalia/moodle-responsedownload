@@ -1,2 +1,5 @@
 quizattempt,firstname,lastname,responses.1.answer,responses.1.-submit,responses.1.-tryagain,responses.2.answer,responses.2.-submit,responses.2.-tryagain
-1,John,Jones,file,1,0,essay,1,0
+1,John,Jones,file1,0,1,text1,0,1
+1,John,Jones,file2,0,1,text2,0,1
+1,John,Jones,file3,1,0,text3,1,0
+2,John,Jones,file4,0,1,text4,0,1
