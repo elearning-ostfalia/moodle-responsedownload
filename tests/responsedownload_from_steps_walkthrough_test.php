@@ -80,6 +80,8 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
     protected function my_walkthrough_attempts($steps) {
         global $DB;
         $attemptids = array();
+
+        $quizobj = null;
         foreach ($steps as $steprow) {
 
             $step = $this->explode_dot_separated_keys_to_make_subindexs($steprow);
@@ -90,24 +92,25 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
             if (!$user = $DB->get_record('user', $username)) {
                 $user = $this->getDataGenerator()->create_user($username);
                 $this->users[$user->id] = $user;
-            }
-
-            global $USER;
-            // Change user.
-            $USER = $user;
-
-            if (!isset($attemptids[$step['quizattempt']])) {
-                // Start the attempt.
                 $quizobj = \quiz::create($this->quiz->id, $user->id);
                 if ($quizobj->has_questions()) {
                     $quizobj->load_questions();
                 }
+
                 $this->slots = [];
                 foreach ($quizobj->get_questions() as $question) {
                     $this->slots[$question->slot] = $question;
                 }
 
-                $usercontext = \context_user::instance($user->id);
+            }
+
+            global $USER;
+            // Change user.
+            $USER = $user;
+            $usercontext = \context_user::instance($user->id);
+
+            if (!isset($attemptids[$step['quizattempt']])) {
+                // Start the attempt.
                 foreach ($step['responses'] as $slot => &$response) { // slot or question??
                     $type = $this->slots[$slot]->qtype;
                     switch ($type) {
@@ -119,8 +122,8 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
                                 case 'filepicker':
                                 case 'explorer':
                                     $attachementsdraftid = file_get_unused_draft_itemid();
-                                    $response['attachments'] = $this->upload_file($usercontext
-                                        /*$quizobj->get_context()*/, $attachementsdraftid, $response['answer'],
+                                    $response['attachments'] = $this->upload_file($usercontext,
+                                            $attachementsdraftid, $response['answer'],
                                         'response_' . $user->id. '_' . $slot . '.java');
                                     unset($response['answer']);
                                     break;
@@ -133,7 +136,6 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
                             break;
                     }
                 }
-
 
                 $quba = \question_engine::make_questions_usage_by_activity('mod_quiz', /* $usercontext*/ $quizobj->get_context());
                 $quba->set_preferred_behaviour($quizobj->get_quiz()->preferredbehaviour);
@@ -157,13 +159,10 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
 
                 quiz_start_new_attempt($quizobj, $quba, $attempt, $attemptnumber, $timenow, $step['randqs'], $step['variants']);
                 quiz_attempt_save_started($quizobj, $quba, $attempt);
-                // \question_engine::save_questions_usage_by_activity($quba);
                 $attemptid = $attemptids[$step['quizattempt']] = $attempt->id;
             } else {
                 $attemptid = $attemptids[$step['quizattempt']];
             }
-
-
 
             // Process some responses from the student.
             $attemptobj = quiz_attempt::create($attemptid);
@@ -227,9 +226,9 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
 //            \quiz_attempts_report::ENROLLED_ALL,
         ];
         $whichtries = [
-            \question_attempt::LAST_TRY,
+//            \question_attempt::LAST_TRY,
 //            \question_attempt::FIRST_TRY,
-//            \question_attempt::ALL_TRIES
+            \question_attempt::ALL_TRIES
         ];
         foreach ($whichtries as $whichtry) {
             foreach ($showqtexts as $showqtext) {
@@ -315,13 +314,13 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
                 }
                 $row[$col] = trim($content);
             }
-            // if ($row[1] != ' ' and $row[1] != '') {
-            // There are empty rows at the end.
-            $rows[] = $row;
-            // }
+            if (strlen($row[1]) > 2) {
+                // There are empty rows at the end.
+                $rows[] = $row;
+            }
         }
         $this->assertNotEquals(0, count($rows));
-        // var_dump($rows);
+        var_dump($rows);
 
         // Check all question texts if available:
         $options->questionindex = [];
