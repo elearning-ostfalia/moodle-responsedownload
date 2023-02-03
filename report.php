@@ -45,7 +45,7 @@ require_once($CFG->dirroot . '/mod/quiz/report/responsedownload/classes/response
 class quiz_responsedownload_report extends quiz_attempts_report {
 
     public function display($quiz, $cm, $course) {
-        global $OUTPUT, $DB;
+        global $OUTPUT;
 
         // Initialisation.
         list($currentgroup, $studentsjoins, $groupstudentsjoins, $allowedjoins) = $this->init(
@@ -59,53 +59,8 @@ class quiz_responsedownload_report extends quiz_attempts_report {
             $options->process_settings_from_params();
         }
         $this->form->set_data($options->get_initial_form_data());
-
-        // Load the required questions.
-        $questions = $this->load_fullquestions($quiz);
-        // Prepare for downloading, if applicable.
-        $courseshortname = format_string($course->shortname, true,
-                array('context' => context_course::instance($course->id)));
-        if ($options->whichtries === question_attempt::LAST_TRY) {
-            $tableclassname = 'quiz_responsedownload_last_responses_table';
-        } else {
-            $tableclassname = 'quiz_responsedownload_first_or_all_responses_table';
-        }
-        $table = new $tableclassname($quiz, $this->context, $this->qmsubselect,
-                $options, $groupstudentsjoins, $studentsjoins, $questions, $options->get_url());
-        $filename = quiz_report_download_filename('responses', $courseshortname, $quiz->name);
-
-        $table->is_downloading($options->download, $filename,
-                $courseshortname . ' ' . format_string($quiz->name, true));
-        if ($table->is_downloading()) {
-            raise_memory_limit(MEMORY_EXTRA);
-        }
-
-        $this->hasgroupstudents = false;
-        if (!empty($groupstudentsjoins->joins)) {
-            $sql = "SELECT DISTINCT u.id
-                      FROM {user} u
-                    $groupstudentsjoins->joins
-                     WHERE $groupstudentsjoins->wheres";
-            $this->hasgroupstudents = $DB->record_exists_sql($sql, $groupstudentsjoins->params);
-        }
-        $hasstudents = false;
-        if (!empty($studentsjoins->joins)) {
-            $sql = "SELECT DISTINCT u.id
-                    FROM {user} u
-                    $studentsjoins->joins
-                    WHERE $studentsjoins->wheres";
-            $hasstudents = $DB->record_exists_sql($sql, $studentsjoins->params);
-        }
-        if ($options->attempts == self::ALL_WITH) {
-            // This option is only available to users who can access all groups in
-            // groups mode, so setting allowed to empty (which means all quiz attempts
-            // are accessible, is not a security problem.
-            $allowedjoins = new \core\dml\sql_join();
-        }
-
-        $this->process_actions($quiz, $cm, $currentgroup, $groupstudentsjoins, $allowedjoins, $options->get_url());
-
-        $hasquestions = quiz_has_questions($quiz->id);
+        list($questions, $table, $hasstudents, $allowedjoins, $hasquestions) = $this->loadData(
+            $quiz, $course, $options, $groupstudentsjoins, $studentsjoins, $allowedjoins, $cm, $currentgroup);
 
         // We need the garbage collector to run.
         $gcenabled = gc_enabled();
@@ -212,5 +167,71 @@ class quiz_responsedownload_report extends quiz_attempts_report {
             $questions[$qno] = $q;
         }
         return $questions;
+    }
+
+    /**
+     * @param $quiz
+     * @param $course
+     * @param quiz_responsedownload_options $options
+     * @param $groupstudentsjoins
+     * @param $studentsjoins
+     * @param moodle_database $DB
+     * @param \core\dml\sql_join $allowedjoins
+     * @param $cm
+     * @param $currentgroup
+     * @return array
+     * @throws dml_exception
+     */
+    protected function loadData($quiz, $course, quiz_responsedownload_options $options, $groupstudentsjoins, $studentsjoins,
+                                \core\dml\sql_join $allowedjoins, $cm, $currentgroup): array
+    {
+        global $DB;
+        // Load the required questions.
+        $questions = $this->load_fullquestions($quiz);
+        // Prepare for downloading, if applicable.
+        $courseshortname = format_string($course->shortname, true,
+            array('context' => context_course::instance($course->id)));
+        if ($options->whichtries === question_attempt::LAST_TRY) {
+            $tableclassname = 'quiz_responsedownload_last_responses_table';
+        } else {
+            $tableclassname = 'quiz_responsedownload_first_or_all_responses_table';
+        }
+        $table = new $tableclassname($quiz, $this->context, $this->qmsubselect,
+            $options, $groupstudentsjoins, $studentsjoins, $questions, $options->get_url());
+        $filename = quiz_report_download_filename('responses', $courseshortname, $quiz->name);
+
+        $table->is_downloading($options->download, $filename,
+            $courseshortname . ' ' . format_string($quiz->name, true));
+        if ($table->is_downloading()) {
+            raise_memory_limit(MEMORY_EXTRA);
+        }
+
+        $this->hasgroupstudents = false;
+        if (!empty($groupstudentsjoins->joins)) {
+            $sql = "SELECT DISTINCT u.id
+                      FROM {user} u
+                    $groupstudentsjoins->joins
+                     WHERE $groupstudentsjoins->wheres";
+            $this->hasgroupstudents = $DB->record_exists_sql($sql, $groupstudentsjoins->params);
+        }
+        $hasstudents = false;
+        if (!empty($studentsjoins->joins)) {
+            $sql = "SELECT DISTINCT u.id
+                    FROM {user} u
+                    $studentsjoins->joins
+                    WHERE $studentsjoins->wheres";
+            $hasstudents = $DB->record_exists_sql($sql, $studentsjoins->params);
+        }
+        if ($options->attempts == self::ALL_WITH) {
+            // This option is only available to users who can access all groups in
+            // groups mode, so setting allowed to empty (which means all quiz attempts
+            // are accessible, is not a security problem.
+            $allowedjoins = new \core\dml\sql_join();
+        }
+
+        $this->process_actions($quiz, $cm, $currentgroup, $groupstudentsjoins, $allowedjoins, $options->get_url());
+
+        $hasquestions = quiz_has_questions($quiz->id);
+        return array($questions, $table, $hasstudents, $allowedjoins, $hasquestions);
     }
 }

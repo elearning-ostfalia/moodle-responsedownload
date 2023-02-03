@@ -205,10 +205,12 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
         // Prepare check.
         $report = new \quiz_responsedownload_report();
         // call of protected method $report->download_proforma_submissions
-        $r = new \ReflectionMethod('\quiz_responsedownload_report', 'create_table');
-        $r->setAccessible(true);
         $init = new \ReflectionMethod('\quiz_responsedownload_report', 'init');
         $init->setAccessible(true);
+        $load = new \ReflectionMethod('\quiz_responsedownload_report', 'loadData');
+        $load->setAccessible(true);
+        $create_table = new \ReflectionMethod('\quiz_responsedownload_report', 'create_table');
+        $create_table->setAccessible(true);
         global $DB;
         $course = $DB->get_record('course', array('id' => $this->quiz->course));
         $cm = \get_coursemodule_from_instance("quiz", $this->quiz->id, $course->id);
@@ -237,28 +239,18 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
                     list($currentgroup, $studentsjoins, $groupstudentsjoins, $allowedjoins) = $init->invoke($report,
                         'responsedownload', 'quiz_responsedownload_settings_form', $this->quiz, $cm, $course);
 
-                    $qmsubselect = quiz_report_qm_filter_select($this->quiz);
-
                     $options = new \quiz_responsedownload_options('responsedownload', $this->quiz, $cm, $course);
                     $options->attempts = $attempt;
                     $options->showqtext = $showqtext;
                     $options->whichtries = $whichtry;
                     $options->download = false;
 
-                    if ($options->whichtries === \question_attempt::LAST_TRY) {
-                        $tableclassname = 'quiz_responsedownload_last_responses_table';
-                    } else {
-                        $tableclassname = 'quiz_responsedownload_first_or_all_responses_table';
-                    }
-
-                    // Load the required questions.
-                    $questions = $report->load_fullquestions($this->quiz);
-
-                    $table = new $tableclassname($this->quiz, $context, $qmsubselect,
-                        $options, $groupstudentsjoins, $studentsjoins, $questions, $options->get_url());
-                    // Create zip.
+                    list($questions, $table, $hasstudents, $allowedjoins, $hasquestions) =
+                        $load->invoke($report,
+                            $this->quiz, $course, $options, $groupstudentsjoins, $studentsjoins, $allowedjoins, $cm, $currentgroup);
                     ob_start();
-                    $r->invoke($report, $table, $questions, $this->quiz, $options, $allowedjoins);
+                    $create_table->invoke($report,
+                            $table, $questions, $this->quiz, $options, $allowedjoins);
                     $output = ob_get_contents();
                     ob_end_clean();
                     $this->checkHtml($output, $csvdata, $options);
@@ -341,8 +333,6 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
 
     protected function find_responses($steps, $rows, $options, $header) {
         $name = $steps['firstname'] . ' ' . $steps['lastname'];
-
-
 
         foreach ($rows as $row) {
             // Check user name.
