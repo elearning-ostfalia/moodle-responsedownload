@@ -28,6 +28,7 @@ require_once($CFG->dirroot . '/mod/quiz/report/statistics/report.php');
 require_once($CFG->dirroot . '/mod/quiz/report/reportlib.php');
 require_once($CFG->dirroot . '/mod/quiz/report/attemptsreport.php');
 require_once($CFG->dirroot . '/mod/quiz/report/responsedownload/report.php');
+require_once($CFG->dirroot . '/question/type/proforma/question.php');
 
 
 /**
@@ -241,30 +242,40 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
 //            'abandoned'
         ];
 
+        $downloads = [
+            0,
+//            1
+        ];
         foreach ($whichtries as $whichtry) {
             foreach ($showqtexts as $showqtext) {
                 foreach ($attempts as $attempt) {
                     foreach ($states as $state) {
-                        // Default initialisation.
-                        list($currentgroup, $studentsjoins, $groupstudentsjoins, $allowedjoins) = $init->invoke($report,
-                            'responsedownload', 'quiz_responsedownload_settings_form', $this->quiz, $cm, $course);
+                        foreach ($downloads as $download) {
+                            // Default initialisation.
+                            list($currentgroup, $studentsjoins, $groupstudentsjoins, $allowedjoins) = $init->invoke($report,
+                                'responsedownload', 'quiz_responsedownload_settings_form', $this->quiz, $cm, $course);
 
-                        $options = new \quiz_responsedownload_options('responsedownload', $this->quiz, $cm, $course);
-                        $options->attempts = $attempt;
-                        $options->showqtext = $showqtext;
-                        $options->whichtries = $whichtry;
-                        $options->download = false;
-                        $options->states = [$state];
+                            $options = new \quiz_responsedownload_options('responsedownload', $this->quiz, $cm, $course);
+                            $options->attempts = $attempt;
+                            $options->showqtext = $showqtext;
+                            $options->whichtries = $whichtry;
+                            $options->download = $download;
+                            $options->states = [$state];
 
-                        list($questions, $table, $hasstudents, $allowedjoins, $hasquestions) =
-                            $load->invoke($report,
-                                $this->quiz, $course, $options, $groupstudentsjoins, $studentsjoins, $allowedjoins, $cm, $currentgroup);
-                        ob_start();
-                        $create_table->invoke($report,
-                            $table, $questions, $this->quiz, $options, $allowedjoins);
-                        $output = ob_get_contents();
-                        ob_end_clean();
-                        $this->checkHtml($output, $csvdata, $options);
+                            list($questions, $table, $hasstudents, $allowedjoins, $hasquestions) =
+                                $load->invoke($report,
+                                    $this->quiz, $course, $options, $groupstudentsjoins, $studentsjoins, $allowedjoins, $cm, $currentgroup);
+                            ob_start();
+                            $create_table->invoke($report,
+                                $table, $questions, $this->quiz, $options, $allowedjoins);
+                            $output = ob_get_contents();
+                            ob_end_clean();
+                            if (!$download) {
+                                $this->checkHtml($output, $csvdata, $options);
+                            } else {
+                                echo $this->filename . PHP_EOL;
+                            }
+                        }
                         break;
                     }
                 }
