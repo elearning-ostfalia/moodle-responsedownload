@@ -156,5 +156,25 @@ ORDER BY
         }
         $this->rawdata = $newrawdata;
     }
+
+    function finish_output($closeexportclassdoc = true) {
+        if (!UNITTEST_IS_RUNNING or !$this->is_downloading()) {
+            parent::finish_output($closeexportclassdoc);
+        } else {
+            if ($this->exportclass!==null) {
+                $this->exportclass->finish_table();
+                if ($closeexportclassdoc) {
+                    $writer = $this->exportclass;
+
+                    $reflection = new ReflectionClass($writer);
+                    $property = $reflection->getProperty('dataformat');
+                    $property->setAccessible(true);
+                    $val = $property->getValue($writer);
+
+                    $val->close_output();
+                }
+            }
+        }
+    }
 }
 

@@ -20,6 +20,8 @@ use question_bank;
 use quiz_attempt;
 
 defined('MOODLE_INTERNAL') || die();
+define('UNITTEST_IS_RUNNING', true);
+
 
 global $CFG;
 require_once($CFG->dirroot . '/mod/quiz/tests/attempt_walkthrough_from_csv_test.php');
@@ -268,14 +270,17 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
                                     $this->quiz, $course, $options, $groupstudentsjoins, $studentsjoins, $allowedjoins, $cm, $currentgroup);
                             $create_table->invoke($report,
                                 $table, $questions, $this->quiz, $options, $allowedjoins);
-                            if (!$download) {
-                                $output = ob_get_contents();
-                            }
+                            $output = ob_get_contents();
                             ob_end_clean();
                             if (!$download) {
                                 $this->checkHtml($output, $csvdata, $options);
                             } else {
-                                echo $table->filename . PHP_EOL;
+                                $filename = tempnam('/tmp', 'responsedowmload');
+                                $filename .= '.zip';
+
+                                file_put_contents($filename, $output);
+                                echo 'write zip file to ' . $filename . PHP_EOL;
+                                // exit(1);
                             }
                         }
                         break;
