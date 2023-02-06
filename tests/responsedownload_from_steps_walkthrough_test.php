@@ -92,6 +92,7 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
             if (!$user = $DB->get_record('user', $username)) {
                 $user = $this->getDataGenerator()->create_user($username);
                 $this->users[$user->id] = $user;
+
                 $quizobj = \quiz::create($this->quiz->id, $user->id);
                 if ($quizobj->has_questions()) {
                     $quizobj->load_questions();
@@ -101,7 +102,6 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
                 foreach ($quizobj->get_questions() as $question) {
                     $this->slots[$question->slot] = $question;
                 }
-
             }
 
             global $USER;
@@ -185,6 +185,8 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
      * @dataProvider get_data_for_walkthrough
      */
     public function test_walkthrough_from_csv($quizsettings, $csvdata) {
+        // Suppress actual grading in qtype_proforma.
+        \qtype_proforma_question::$systemundertest = true;
 
         $this->resetAfterTest(true);
         question_bank::get_qtype('random')->clear_caches_before_testing();
@@ -286,7 +288,7 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
         }
 
         $this->assertNotEquals(0, count($header));
-        // print_r($header);
+        print_r($header);
 
         // Evaluate body fields.
         $body = $xpath->query("//table[@id='responses']/tbody/tr");
@@ -306,8 +308,15 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
                 }
                 $row[$col] = trim($content);
             }
-            if (strlen($row[1]) > 2) {
-                // There are empty rows at the end.
+            // There are empty rows at the end. Check for them.
+            $emptyrow = true;
+            foreach ($row as $col) {
+                if (strlen($col) > 2) {
+                    $emptyrow = false;
+                }
+            }
+            if (!$emptyrow) {
+                // No empty row.
                 $rows[] = $row;
             }
         }
@@ -324,21 +333,26 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
             }
         }
 
-        foreach ($csvdata['steps'] as $stepsfromcsv) {
-            $steps = $this->explode_dot_separated_keys_to_make_subindexs($stepsfromcsv);
-            print_r($steps);
-            $this->assertTrue($this->find_responses($steps, $rows, $options, $header));
+        foreach ($csvdata['steps'] as $stepfromcsv) {
+            $step = $this->explode_dot_separated_keys_to_make_subindexs($stepfromcsv);
+            print_r($step);
+            $this->assertTrue($this->find_matching_row($step, $rows, $options, $header));
         }
     }
 
-    protected function find_responses($steps, $rows, $options, $header) {
-        $name = $steps['firstname'] . ' ' . $steps['lastname'];
+    protected function find_matching_row($step, $rows, $options, $header) {
+        $name = $step['firstname'] . ' ' . $step['lastname'];
 
+        $lastusername = null;
         foreach ($rows as $row) {
             // Check user name.
             if ($row[1] != $name) {
-                continue;
+                $emptyname = (strlen($row[1]) < 3);
+                if (!$emptyname or $lastusername != $name) {
+                    continue;
+                }
             }
+            $lastusername = $name;
 
             // Check question text if available
             if ($options->showqtext) {
@@ -350,54 +364,13 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
             }
 
             // Check all responses:
-            foreach ($steps['responses'] as $index => $response) {
-                $found = false;
-                switch ($this->slots[$index]->options->responseformat) {
-                    case 'editor':
-                        foreach ($row as $col) {
-                            if ($col != $response['answer']) {
-                                continue;
-                            }
-                            $found = true;
-                            break;
-                        }
-                        break;
-                    case 'filepicker':
-                    case 'explorer':
-                        foreach ($row as $colindex => $col) {
-                            if (strpos($col, 'Files:') === false) {
-                                continue;
-                            }
-                            // Check if response belongs to user.
-                            $pattern = "/Files: response_(\d+)_" . $index . ".java/i";
-                            $matches = [];
-                            if (!preg_match($pattern, $col, $matches)) {
-/*                                echo 'File does not match:' . PHP_EOL;
-                                var_dump($col);
-                                var_dump($pattern);*/
-                                continue;
-                            }
-                            $this->assertEquals(1, preg_match($pattern, $col, $matches));
-
-                            $user = $this->users[$matches[1]];
-                            $this->assertEquals($steps['lastname'], $user->lastname);
-                            $this->assertEquals($steps['firstname'], $user->firstname);
-                            $headercol = $header[$colindex];
-                            $this->assertEquals(1, preg_match('/response(\d+)/i', $headercol, $matches));
-                            $this->assertEquals($matches[1], $index);
-                            $found = true;
-                            break;
-                        }
-                        break;
-                    default:
-                        throw new \coding_exception('invalid proforma subtype ' .
-                            $this->slots[$index]->options->responseformat);
-                }
-                $this->assertTrue($found);
+            if (!$this->responses_match($step, $row, $header)) {
+                continue;
             }
             return true;
         }
 
+        // No matching row found.
         return false;
     }
 
@@ -454,5 +427,56 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
                 }
             }
         }
+    }
+
+    /**
+     * @param $step
+     * @param $row
+     * @param $header
+     * @return bool
+     * @throws \coding_exception
+     */
+    protected function responses_match($step, $row, $header): bool
+    {
+        foreach ($step['responses'] as $index => $response) {
+            // Find col => header = response $index
+            $colname = 'response' . $index;
+            $colindex = array_search($colname, $header);
+            $col = $row[$colindex];
+            switch ($this->slots[$index]->options->responseformat) {
+                case 'editor':
+                    if ($col != $response['answer']) {
+                        return false;
+                    }
+                    break;
+                case 'filepicker':
+                case 'explorer':
+                    if (strpos($col, 'Files:') === false) {
+                        return false;
+                    }
+                    // Check if response belongs to user.
+                    $pattern = "/Files: response_(\d+)_" . $index . ".java/i";
+                    $matches = [];
+                    if (!preg_match($pattern, $col, $matches)) {
+                    /*  echo 'File does not match:' . PHP_EOL;
+                        var_dump($col);
+                        var_dump($pattern);*/
+                        return false;
+                    }
+                    $this->assertEquals(1, preg_match($pattern, $col, $matches));
+
+                    $user = $this->users[$matches[1]];
+                    $this->assertEquals($step['lastname'], $user->lastname);
+                    $this->assertEquals($step['firstname'], $user->firstname);
+                    $headercol = $header[$colindex];
+                    $this->assertEquals(1, preg_match('/response(\d+)/i', $headercol, $matches));
+                    $this->assertEquals($matches[1], $index);
+                    break;
+                default:
+                    throw new \coding_exception('invalid proforma subtype ' .
+                        $this->slots[$index]->options->responseformat);
+            }
+        }
+        return true;
     }
 }
