@@ -221,7 +221,7 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
         // Possible combinations.
         $showqtexts = [
             1,
-//            0
+            0
         ];
         $attempts = [
             \quiz_attempts_report::ALL_WITH,
@@ -230,8 +230,8 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
 //            \quiz_attempts_report::ENROLLED_ALL,
         ];
         $whichtries = [
-//            \question_attempt::LAST_TRY,
-//            \question_attempt::FIRST_TRY,
+            \question_attempt::LAST_TRY,
+            \question_attempt::FIRST_TRY,
             \question_attempt::ALL_TRIES
         ];
         foreach ($whichtries as $whichtry) {
@@ -333,14 +333,38 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
             }
         }
 
+        $lastattemptindex = null;
+        $laststep = null;
         foreach ($csvdata['steps'] as $stepfromcsv) {
             $step = $this->explode_dot_separated_keys_to_make_subindexs($stepfromcsv);
-            print_r($step);
-            $this->assertTrue($this->find_matching_row($step, $rows, $options, $header));
+            $quizattempt = $stepfromcsv['quizattempt'];
+            switch ($options->whichtries) {
+                case \question_attempt::LAST_TRY:
+                    if ($quizattempt != $lastattemptindex and isset($laststep)) {
+                        $this->assertTrue($this->find_matching_row($laststep, $rows, $options, $header));
+                    }
+                    break;
+                case \question_attempt::FIRST_TRY:
+                    if ($quizattempt != $lastattemptindex) {
+                        $this->assertTrue($this->find_matching_row($step, $rows, $options, $header));
+                    }
+                    break;
+                case \question_attempt::ALL_TRIES:
+                    $this->assertTrue($this->find_matching_row($step, $rows, $options, $header));
+                    break;
+            }
+            $lastattemptindex = $quizattempt;
+            $laststep = $step;
+        }
+
+        if (($options->whichtries == \question_attempt::LAST_TRY) and isset($laststep)) {
+            $this->assertTrue($this->find_matching_row($laststep, $rows, $options, $header));
         }
     }
 
     protected function find_matching_row($step, $rows, $options, $header) {
+        print_r($step);
+
         $name = $step['firstname'] . ' ' . $step['lastname'];
 
         $lastusername = null;
