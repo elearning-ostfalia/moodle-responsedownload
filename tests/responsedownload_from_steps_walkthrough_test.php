@@ -234,29 +234,39 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
             \question_attempt::FIRST_TRY,
             \question_attempt::ALL_TRIES
         ];
+        $states = [
+//            'overdue',
+//            'inprogress',
+            'finished',
+//            'abandoned'
+        ];
+
         foreach ($whichtries as $whichtry) {
             foreach ($showqtexts as $showqtext) {
                 foreach ($attempts as $attempt) {
-                    // Default initialisation.
-                    list($currentgroup, $studentsjoins, $groupstudentsjoins, $allowedjoins) = $init->invoke($report,
-                        'responsedownload', 'quiz_responsedownload_settings_form', $this->quiz, $cm, $course);
+                    foreach ($states as $state) {
+                        // Default initialisation.
+                        list($currentgroup, $studentsjoins, $groupstudentsjoins, $allowedjoins) = $init->invoke($report,
+                            'responsedownload', 'quiz_responsedownload_settings_form', $this->quiz, $cm, $course);
 
-                    $options = new \quiz_responsedownload_options('responsedownload', $this->quiz, $cm, $course);
-                    $options->attempts = $attempt;
-                    $options->showqtext = $showqtext;
-                    $options->whichtries = $whichtry;
-                    $options->download = false;
+                        $options = new \quiz_responsedownload_options('responsedownload', $this->quiz, $cm, $course);
+                        $options->attempts = $attempt;
+                        $options->showqtext = $showqtext;
+                        $options->whichtries = $whichtry;
+                        $options->download = false;
+                        $options->states = [$state];
 
-                    list($questions, $table, $hasstudents, $allowedjoins, $hasquestions) =
-                        $load->invoke($report,
-                            $this->quiz, $course, $options, $groupstudentsjoins, $studentsjoins, $allowedjoins, $cm, $currentgroup);
-                    ob_start();
-                    $create_table->invoke($report,
+                        list($questions, $table, $hasstudents, $allowedjoins, $hasquestions) =
+                            $load->invoke($report,
+                                $this->quiz, $course, $options, $groupstudentsjoins, $studentsjoins, $allowedjoins, $cm, $currentgroup);
+                        ob_start();
+                        $create_table->invoke($report,
                             $table, $questions, $this->quiz, $options, $allowedjoins);
-                    $output = ob_get_contents();
-                    ob_end_clean();
-                    $this->checkHtml($output, $csvdata, $options);
-                    break;
+                        $output = ob_get_contents();
+                        ob_end_clean();
+                        $this->checkHtml($output, $csvdata, $options);
+                        break;
+                    }
                 }
             }
         }
@@ -288,7 +298,7 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
         }
 
         $this->assertNotEquals(0, count($header));
-        print_r($header);
+        // print_r($header);
 
         // Evaluate body fields.
         $body = $xpath->query("//table[@id='responses']/tbody/tr");
@@ -321,7 +331,7 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
             }
         }
         $this->assertNotEquals(0, count($rows));
-        var_dump($rows);
+        // var_dump($rows);
 
         // Check all question texts if available:
         $options->questionindex = [];
@@ -363,7 +373,7 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
     }
 
     protected function find_matching_row($step, $rows, $options, $header) {
-        print_r($step);
+        // print_r($step);
 
         $name = $step['firstname'] . ' ' . $step['lastname'];
 
@@ -482,9 +492,6 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
                     $pattern = "/Files: response_(\d+)_" . $index . ".java/i";
                     $matches = [];
                     if (!preg_match($pattern, $col, $matches)) {
-                    /*  echo 'File does not match:' . PHP_EOL;
-                        var_dump($col);
-                        var_dump($pattern);*/
                         return false;
                     }
                     $this->assertEquals(1, preg_match($pattern, $col, $matches));
