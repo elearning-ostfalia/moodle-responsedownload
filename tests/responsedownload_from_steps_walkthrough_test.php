@@ -243,8 +243,8 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
         ];
 
         $downloads = [
-            0,
-//            1
+//            0,
+            1
         ];
         foreach ($whichtries as $whichtry) {
             foreach ($showqtexts as $showqtext) {
@@ -262,18 +262,20 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
                             $options->download = $download;
                             $options->states = [$state];
 
+                            ob_start();
                             list($questions, $table, $hasstudents, $allowedjoins, $hasquestions) =
                                 $load->invoke($report,
                                     $this->quiz, $course, $options, $groupstudentsjoins, $studentsjoins, $allowedjoins, $cm, $currentgroup);
-                            ob_start();
                             $create_table->invoke($report,
                                 $table, $questions, $this->quiz, $options, $allowedjoins);
-                            $output = ob_get_contents();
+                            if (!$download) {
+                                $output = ob_get_contents();
+                            }
                             ob_end_clean();
                             if (!$download) {
                                 $this->checkHtml($output, $csvdata, $options);
                             } else {
-                                echo $this->filename . PHP_EOL;
+                                echo $table->filename . PHP_EOL;
                             }
                         }
                         break;
