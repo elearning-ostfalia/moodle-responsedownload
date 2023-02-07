@@ -621,20 +621,6 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
         $archive->open($filenamearchive);
         $countMatches = 0; // count number of matching files.
 
-        // ALT: alle Schritte
-        /*
-        foreach ($csvdata['steps'] as $stepsfromcsv) {
-            $steps = $this->explode_dot_separated_keys_to_make_subindexs($stepsfromcsv);
-
-            foreach ($steps['responses'] as $index => $answer) {
-                $this->assertTrue($this->find_answer($steps, $index, $answer, $archive, $options));
-                $countMatches++;
-                $this->assertEquals($options->showqtext, $this->find_questiontext($steps, $index, $answer, $archive, $options, $this->slots[$index]));
-            }
-        }
-*/
-        // NEU aus html-test: nur richtige Schritte
-
         $lastattemptindex = null;
         $laststep = null;
         foreach ($csvdata['steps'] as $stepfromcsv) {
@@ -643,33 +629,19 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
             switch ($options->whichtries) {
                 case \question_attempt::LAST_TRY:
                     if ($quizattempt != $lastattemptindex and isset($laststep)) {
-// ZIP
-                        $answer = $laststep['responses'][1];
-                        $this->assertTrue($this->find_answer($laststep, $lastattemptindex, $answer, $archive, $options));
+                        $this->assertTrue($this->find_response($laststep, $archive, $options));
                         $countMatches++;
-                        $this->assertEquals($options->showqtext, $this->find_questiontext($laststep, $lastattemptindex,
-                            $answer, $archive, $options, $this->slots[$lastattemptindex]));
-// HTML
-//                        $this->assertTrue($this->find_matching_row($laststep, $rows, $options, $header));
                     }
                     break;
                 case \question_attempt::FIRST_TRY:
                     if ($quizattempt != $lastattemptindex) {
-//                        $this->assertTrue($this->find_matching_row($step, $rows, $options, $header));
-                        $answer = $step['responses'][1];
-                        $this->assertTrue($this->find_answer($step, $quizattempt, $answer, $archive, $options));
+                        $this->assertTrue($this->find_response($step, $archive, $options));
                         $countMatches++;
-                        $this->assertEquals($options->showqtext, $this->find_questiontext($step, $quizattempt,
-                            $answer, $archive, $options, $this->slots[$quizattempt]));
                     }
                     break;
                 case \question_attempt::ALL_TRIES:
-//                    $this->assertTrue($this->find_matching_row($step, $rows, $options, $header));
-                    $answer = $step['responses'][1];
-                    $this->assertTrue($this->find_answer($step, $quizattempt, $answer, $archive, $options));
+                    $this->assertTrue($this->find_response($step, $archive, $options));
                     $countMatches++;
-                    $this->assertEquals($options->showqtext, $this->find_questiontext($step, $quizattempt,
-                        $answer, $archive, $options, $this->slots[$quizattempt]));
                     break;
             }
             $lastattemptindex = $quizattempt;
@@ -677,14 +649,9 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
         }
 
         if (($options->whichtries == \question_attempt::LAST_TRY) and isset($laststep)) {
-            // $this->assertTrue($this->find_matching_row($laststep, $rows, $options, $header));
-            $answer = $laststep['responses'][1];
-            $this->assertTrue($this->find_answer($laststep, $lastattemptindex, $answer, $archive, $options));
+            $this->assertTrue($this->find_response($laststep, $archive, $options));
             $countMatches++;
-            $this->assertEquals($options->showqtext, $this->find_questiontext($laststep, $lastattemptindex,
-                $answer, $archive, $options, $this->slots[$lastattemptindex]));
         }
-        // NEU
 
 
         // Note: Two attempts come from qtype_proforma - Test helper
@@ -703,6 +670,17 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
             unlink($filenamearchive);
         }
     }
+
+    protected function find_response($step, $archive, $options) {
+        foreach ($this->slots as $sindex => $question) {
+            $answer = $step['responses'][$sindex];
+            $this->assertTrue($this->find_answer($step, $sindex, $answer, $archive, $options));
+            $this->assertEquals($options->showqtext, $this->find_questiontext($step, $sindex,
+                $archive, $question));
+        }
+        return true;
+    }
+
     protected function find_answer($step, $questionindex, $answer, $archive, $options) {
         $question = 'Q' . $questionindex;
         $name = $step['lastname'] . '-' . $step['firstname'];
@@ -730,11 +708,10 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
         return false;
     }
 
-    protected function find_questiontext($steps, $questionindex, $answer, $archive, $options, $questionobj) {
+    protected function find_questiontext($steps, $questionindex, $archive, $questionobj) {
         $question = 'Q' . $questionindex;
         $name = $steps['lastname'] . '-' . $steps['firstname'];
         // var_dump($path);
-        $content = $answer['answer'];
 
         for( $i = 0; $i < $archive->numFiles; $i++ ) {
             $filename = $archive->getNameIndex($i);
