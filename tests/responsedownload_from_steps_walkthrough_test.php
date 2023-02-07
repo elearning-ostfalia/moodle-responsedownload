@@ -190,7 +190,8 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
      * @param array $csvdata of data read from csv file "questionsXX.csv", "stepsXX.csv" and "responsesXX.csv".
      * @dataProvider get_data_for_walkthrough
      */
-    public function test_walkthrough_from_csv($quizsettings, $csvdata) {
+    public function test_walkthrough_from_csv($quizsettings, $csvdata)
+    {
         // Suppress actual grading in qtype_proforma.
         \qtype_proforma_question::$systemundertest = true;
 
@@ -226,8 +227,8 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
 
         // Possible combinations.
         $showqtexts = [
+            0,
             1,
-            0
         ];
         $attempts = [
             \quiz_attempts_report::ALL_WITH,
@@ -236,8 +237,8 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
 //            \quiz_attempts_report::ENROLLED_ALL,
         ];
         $whichtries = [
-//            \question_attempt::LAST_TRY,
-//            \question_attempt::FIRST_TRY,
+            \question_attempt::LAST_TRY,
+            \question_attempt::FIRST_TRY,
             \question_attempt::ALL_TRIES
         ];
         $states = [
@@ -247,91 +248,123 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
 //            'abandoned'
         ];
 
-        $downloads = [
-//            0,
-            1
-        ];
-
         foreach ($whichtries as $whichtry) {
             foreach ($showqtexts as $showqtext) {
                 foreach ($attempts as $attempt) {
                     foreach ($states as $state) {
-                        foreach ($downloads as $download) {
-                            if ($download) {
-                                // Download version
-                                // => more iterations.
-                                $downloadpaths = [
-                                    \quiz_responsedownload_options::QUESTION_WISE,
-                                    \quiz_responsedownload_options::STUDENT_WISE
-                                ];
-                                $editorfilenames = [
-                                    \quiz_responsedownload_options::FIXED_NAME,
-                                    \quiz_responsedownload_options::NAME_FROM_QUESTION_WITH_PATH,
-                                    \quiz_responsedownload_options::NAME_FROM_QUESTION_WO_PATH,
-                                ];
-                                foreach ($downloadpaths as $downloadpath) {
-                                    foreach ($editorfilenames as $editorfilename) {
+                        // Start without download:
+                        $this->run_html_test($init, $report, $cm, $course, $attempt, $showqtext, $whichtry, $state, $load, $create_table, $csvdata);
 
-                                        // Default initialisation.
-                                        list($currentgroup, $studentsjoins, $groupstudentsjoins, $allowedjoins) = $init->invoke($report,
-                                            'responsedownload', 'quiz_responsedownload_settings_form', $this->quiz, $cm, $course);
-
-                                        $options = new \quiz_responsedownload_options('responsedownload', $this->quiz, $cm, $course);
-                                        $options->attempts = $attempt;
-                                        $options->showqtext = $showqtext;
-                                        $options->whichtries = $whichtry;
-                                        $options->download = $download;
-                                        $options->states = [$state];
-                                        $options->folders = $downloadpath;
-                                        $options->editorfilename = $editorfilename;
-                                        echo '$attempt ' .  $attempt . ' $showqtext ' .  $showqtext . PHP_EOL;
-
-                                        ob_start();
-                                        list($questions, $table, $hasstudents, $allowedjoins, $hasquestions) =
-                                            $load->invoke($report,
-                                                $this->quiz, $course, $options, $groupstudentsjoins, $studentsjoins, $allowedjoins, $cm, $currentgroup);
-
-                                        $create_table->invoke($report,
-                                            $table, $questions, $this->quiz, $options, $allowedjoins);
-                                        $output = ob_get_contents();
-                                        ob_end_clean();
-                                        $filename = tempnam('/tmp', 'responsedowmload');
-                                        $filename .= '.zip';
-
-                                        file_put_contents($filename, $output);
-                                        echo 'write zip file to ' . $filename . PHP_EOL;
-                                        $this->checkZipContent($filename, $csvdata, '', $options);
-                                    }
-                                }
-                            } else {
-                                // NO download.
-                                // Default initialisation.
-                                list($currentgroup, $studentsjoins, $groupstudentsjoins, $allowedjoins) = $init->invoke($report,
-                                    'responsedownload', 'quiz_responsedownload_settings_form', $this->quiz, $cm, $course);
-
-                                $options = new \quiz_responsedownload_options('responsedownload', $this->quiz, $cm, $course);
-                                $options->attempts = $attempt;
-                                $options->showqtext = $showqtext;
-                                $options->whichtries = $whichtry;
-                                $options->download = $download;
-                                $options->states = [$state];
-
-                                echo '$attempt ' .  $attempt . ' $showqtext ' .  $showqtext . PHP_EOL;
-
-                                ob_start();
-                                list($questions, $table, $hasstudents, $allowedjoins, $hasquestions) =
-                                    $load->invoke($report,
-                                        $this->quiz, $course, $options, $groupstudentsjoins, $studentsjoins, $allowedjoins, $cm, $currentgroup);
-
-                                $create_table->invoke($report,
-                                    $table, $questions, $this->quiz, $options, $allowedjoins);
-                                $output = ob_get_contents();
-                                ob_end_clean();
-                                $this->checkHtml($output, $csvdata, $options);
-                            }
-                        }
+                        // Download version:
+                        $this->run_download_test($init, $report, $cm, $course, $attempt, $showqtext, $whichtry, $state, $load, $create_table, $csvdata);
                     }
                 }
+            }
+        }
+    }
+
+    /**
+     * @param \ReflectionMethod $init
+     * @param \quiz_responsedownload_report $report
+     * @param \stdClass $cm
+     * @param $course
+     * @param $attempt
+     * @param int $showqtext
+     * @param $whichtry
+     * @param string $state
+     * @param \ReflectionMethod $load
+     * @param \ReflectionMethod $create_table
+     * @param array $csvdata
+     * @return
+     * @throws \ReflectionException
+     */
+    protected function run_html_test(\ReflectionMethod $init, \quiz_responsedownload_report $report, \stdClass $cm, $course, $attempt, int $showqtext, $whichtry, string $state, \ReflectionMethod $load, \ReflectionMethod $create_table, array $csvdata) {
+        list($currentgroup, $studentsjoins, $groupstudentsjoins, $allowedjoins) = $init->invoke($report,
+            'responsedownload', 'quiz_responsedownload_settings_form', $this->quiz, $cm, $course);
+
+        $options = new \quiz_responsedownload_options('responsedownload', $this->quiz, $cm, $course);
+        $options->attempts = $attempt;
+        $options->showqtext = $showqtext;
+        $options->whichtries = $whichtry;
+        $options->download = 0;
+        $options->states = [$state];
+
+        echo '$attempt ' . $attempt . ' $showqtext ' . $showqtext . PHP_EOL;
+
+        ob_start();
+        list($questions, $table, $hasstudents, $allowedjoins, $hasquestions) =
+            $load->invoke($report,
+                $this->quiz, $course, $options, $groupstudentsjoins, $studentsjoins, $allowedjoins, $cm, $currentgroup);
+
+        $create_table->invoke($report,
+            $table, $questions, $this->quiz, $options, $allowedjoins);
+        $output = ob_get_contents();
+        ob_end_clean();
+        $this->checkHtml($output, $csvdata, $options);
+    }
+
+    /**
+     * @param \ReflectionMethod $init
+     * @param \quiz_responsedownload_report $report
+     * @param \stdClass $cm
+     * @param $course
+     * @param $attempt
+     * @param int $showqtext
+     * @param $whichtry
+     * @param string $state
+     * @param \ReflectionMethod $load
+     * @param \ReflectionMethod $create_table
+     * @param array $csvdata
+     * @throws \ReflectionException
+     */
+    protected function run_download_test(\ReflectionMethod $init, \quiz_responsedownload_report $report, \stdClass $cm, $course, $attempt, int $showqtext, $whichtry, string $state, \ReflectionMethod $load, \ReflectionMethod $create_table, array $csvdata): void
+    {
+// => more iterations.
+        $downloadpaths = [
+            \quiz_responsedownload_options::STUDENT_WISE,
+            \quiz_responsedownload_options::QUESTION_WISE,
+        ];
+        $editorfilenames = [
+            \quiz_responsedownload_options::NAME_FROM_QUESTION_WITH_PATH,
+            \quiz_responsedownload_options::FIXED_NAME,
+            \quiz_responsedownload_options::NAME_FROM_QUESTION_WO_PATH,
+        ];
+        foreach ($downloadpaths as $downloadpath) {
+            foreach ($editorfilenames as $editorfilename) {
+
+                // Default initialisation.
+                list($currentgroup, $studentsjoins, $groupstudentsjoins, $allowedjoins) = $init->invoke($report,
+                    'responsedownload', 'quiz_responsedownload_settings_form', $this->quiz, $cm, $course);
+
+                $options = new \quiz_responsedownload_options('responsedownload', $this->quiz, $cm, $course);
+                $options->attempts = $attempt;
+                $options->showqtext = $showqtext;
+                $options->whichtries = $whichtry;
+                $options->download = 1;
+                $options->states = [$state];
+                $options->folders = $downloadpath;
+                $options->editorfilename = $editorfilename;
+                echo '$attempt: ' . $attempt . ' $showqtext: ' . $showqtext .
+                    ' $editorfilename: ' . $editorfilename .
+                    ' $downloadpath: ' . $downloadpath .
+                    PHP_EOL;
+                flush();
+
+                ob_start();
+                list($questions, $table, $hasstudents, $allowedjoins, $hasquestions) =
+                    $load->invoke($report,
+                        $this->quiz, $course, $options, $groupstudentsjoins, $studentsjoins, $allowedjoins, $cm, $currentgroup);
+
+                $create_table->invoke($report,
+                    $table, $questions, $this->quiz, $options, $allowedjoins);
+                $output = ob_get_contents();
+                ob_end_clean();
+                $filename = tempnam('/tmp', 'responsedowmload');
+                $filename .= '.zip';
+
+                file_put_contents($filename, $output);
+                echo 'write zip file to ' . $filename . PHP_EOL;
+                $this->checkZipContent($filename, $csvdata, '', $options);
             }
         }
     }
@@ -587,36 +620,73 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
         $archive = new \ZipArchive();
         $archive->open($filenamearchive);
         $countMatches = 0; // count number of matching files.
-        $countSteps = 0;
 
+        // ALT: alle Schritte
+        /*
         foreach ($csvdata['steps'] as $stepsfromcsv) {
             $steps = $this->explode_dot_separated_keys_to_make_subindexs($stepsfromcsv);
 
             foreach ($steps['responses'] as $index => $answer) {
-                $countSteps++;
-/*
-                switch ($this->slots[$index]->options->responseformat) {
-                    case 'editor':
-                        $countSteps++;
-                        if (!$this->find_answer($steps, $index, $answer, $archive, $options)) {
-                            $countMatches++;
-                        }
-                        break;
-                    case 'filepicker':
-                    case 'explorer':
-                        $countSteps++;
-                        break;
-                    default:
-                        throw new \coding_exception('invalid proforma subtype ' . $this->slots[$index]->options->responseformat);
-                }
-*/
                 $this->assertTrue($this->find_answer($steps, $index, $answer, $archive, $options));
                 $countMatches++;
                 $this->assertEquals($options->showqtext, $this->find_questiontext($steps, $index, $answer, $archive, $options, $this->slots[$index]));
             }
         }
+*/
+        // NEU aus html-test: nur richtige Schritte
 
-        $this->assertEquals($countSteps, $countMatches);
+        $lastattemptindex = null;
+        $laststep = null;
+        foreach ($csvdata['steps'] as $stepfromcsv) {
+            $step = $this->explode_dot_separated_keys_to_make_subindexs($stepfromcsv);
+            $quizattempt = $stepfromcsv['quizattempt'];
+            switch ($options->whichtries) {
+                case \question_attempt::LAST_TRY:
+                    if ($quizattempt != $lastattemptindex and isset($laststep)) {
+// ZIP
+                        $answer = $laststep['responses'][1];
+                        $this->assertTrue($this->find_answer($laststep, $lastattemptindex, $answer, $archive, $options));
+                        $countMatches++;
+                        $this->assertEquals($options->showqtext, $this->find_questiontext($laststep, $lastattemptindex,
+                            $answer, $archive, $options, $this->slots[$lastattemptindex]));
+// HTML
+//                        $this->assertTrue($this->find_matching_row($laststep, $rows, $options, $header));
+                    }
+                    break;
+                case \question_attempt::FIRST_TRY:
+                    if ($quizattempt != $lastattemptindex) {
+//                        $this->assertTrue($this->find_matching_row($step, $rows, $options, $header));
+                        $answer = $step['responses'][1];
+                        $this->assertTrue($this->find_answer($step, $quizattempt, $answer, $archive, $options));
+                        $countMatches++;
+                        $this->assertEquals($options->showqtext, $this->find_questiontext($step, $quizattempt,
+                            $answer, $archive, $options, $this->slots[$quizattempt]));
+                    }
+                    break;
+                case \question_attempt::ALL_TRIES:
+//                    $this->assertTrue($this->find_matching_row($step, $rows, $options, $header));
+                    $answer = $step['responses'][1];
+                    $this->assertTrue($this->find_answer($step, $quizattempt, $answer, $archive, $options));
+                    $countMatches++;
+                    $this->assertEquals($options->showqtext, $this->find_questiontext($step, $quizattempt,
+                        $answer, $archive, $options, $this->slots[$quizattempt]));
+                    break;
+            }
+            $lastattemptindex = $quizattempt;
+            $laststep = $step;
+        }
+
+        if (($options->whichtries == \question_attempt::LAST_TRY) and isset($laststep)) {
+            // $this->assertTrue($this->find_matching_row($laststep, $rows, $options, $header));
+            $answer = $laststep['responses'][1];
+            $this->assertTrue($this->find_answer($laststep, $lastattemptindex, $answer, $archive, $options));
+            $countMatches++;
+            $this->assertEquals($options->showqtext, $this->find_questiontext($laststep, $lastattemptindex,
+                $answer, $archive, $options, $this->slots[$lastattemptindex]));
+        }
+        // NEU
+
+
         // Note: Two attempts come from qtype_proforma - Test helper
         $this->assertTrue($archive->numFiles >= $countMatches);
         /*
@@ -633,9 +703,9 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
             unlink($filenamearchive);
         }
     }
-    protected function find_answer($steps, $questionindex, $answer, $archive, $options) {
+    protected function find_answer($step, $questionindex, $answer, $archive, $options) {
         $question = 'Q' . $questionindex;
-        $name = $steps['lastname'] . '-' . $steps['firstname'];
+        $name = $step['lastname'] . '-' . $step['firstname'];
         // var_dump($path);
         $content = $answer['answer'];
 
@@ -676,15 +746,14 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
                 continue;
             }
 
-            // name is only in filepath if folders are studentwise
+/*            // name is only in filepath if folders are studentwise
             if ($options->folders == \quiz_responsedownload_options::STUDENT_WISE) {
                 if ((strpos($filename, $name) === false)) {
                     continue;
                 }
-            }
+            }*/
 
             // filename found => check content.
-            // var_dump($filename);
             $filecontent = $archive->getFromName($filename);
             // var_dump($filecontent);
             $this->assertEquals($questionobj->questiontext, $filecontent);
