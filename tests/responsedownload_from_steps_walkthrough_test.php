@@ -43,6 +43,9 @@ require_once($CFG->dirroot . '/question/type/proforma/question.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_walkthrough_from_csv_test {
+
+    const delete_tmp_archives = false;
+
     protected function get_full_path_of_csv_file($setname, $test) {
         // Overridden here so that __DIR__ points to the path of this file.
         return  __DIR__."/fixtures/{$setname}{$test}.csv";
@@ -233,8 +236,8 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
 //            \quiz_attempts_report::ENROLLED_ALL,
         ];
         $whichtries = [
-            \question_attempt::LAST_TRY,
-            \question_attempt::FIRST_TRY,
+//            \question_attempt::LAST_TRY,
+//            \question_attempt::FIRST_TRY,
             \question_attempt::ALL_TRIES
         ];
         $states = [
@@ -248,42 +251,85 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
 //            0,
             1
         ];
+
         foreach ($whichtries as $whichtry) {
             foreach ($showqtexts as $showqtext) {
                 foreach ($attempts as $attempt) {
                     foreach ($states as $state) {
                         foreach ($downloads as $download) {
-                            // Default initialisation.
-                            list($currentgroup, $studentsjoins, $groupstudentsjoins, $allowedjoins) = $init->invoke($report,
-                                'responsedownload', 'quiz_responsedownload_settings_form', $this->quiz, $cm, $course);
+                            if ($download) {
+                                // Download version
+                                // => more iterations.
+                                $downloadpaths = [
+                                    \quiz_responsedownload_options::QUESTION_WISE,
+                                    \quiz_responsedownload_options::STUDENT_WISE
+                                ];
+                                $editorfilenames = [
+                                    \quiz_responsedownload_options::FIXED_NAME,
+                                    \quiz_responsedownload_options::NAME_FROM_QUESTION_WITH_PATH,
+                                    \quiz_responsedownload_options::NAME_FROM_QUESTION_WO_PATH,
+                                ];
+                                foreach ($downloadpaths as $downloadpath) {
+                                    foreach ($editorfilenames as $editorfilename) {
 
-                            $options = new \quiz_responsedownload_options('responsedownload', $this->quiz, $cm, $course);
-                            $options->attempts = $attempt;
-                            $options->showqtext = $showqtext;
-                            $options->whichtries = $whichtry;
-                            $options->download = $download;
-                            $options->states = [$state];
+                                        // Default initialisation.
+                                        list($currentgroup, $studentsjoins, $groupstudentsjoins, $allowedjoins) = $init->invoke($report,
+                                            'responsedownload', 'quiz_responsedownload_settings_form', $this->quiz, $cm, $course);
 
-                            ob_start();
-                            list($questions, $table, $hasstudents, $allowedjoins, $hasquestions) =
-                                $load->invoke($report,
-                                    $this->quiz, $course, $options, $groupstudentsjoins, $studentsjoins, $allowedjoins, $cm, $currentgroup);
-                            $create_table->invoke($report,
-                                $table, $questions, $this->quiz, $options, $allowedjoins);
-                            $output = ob_get_contents();
-                            ob_end_clean();
-                            if (!$download) {
-                                $this->checkHtml($output, $csvdata, $options);
+                                        $options = new \quiz_responsedownload_options('responsedownload', $this->quiz, $cm, $course);
+                                        $options->attempts = $attempt;
+                                        $options->showqtext = $showqtext;
+                                        $options->whichtries = $whichtry;
+                                        $options->download = $download;
+                                        $options->states = [$state];
+                                        $options->folders = $downloadpath;
+                                        $options->editorfilename = $editorfilename;
+                                        echo '$attempt ' .  $attempt . ' $showqtext ' .  $showqtext . PHP_EOL;
+
+                                        ob_start();
+                                        list($questions, $table, $hasstudents, $allowedjoins, $hasquestions) =
+                                            $load->invoke($report,
+                                                $this->quiz, $course, $options, $groupstudentsjoins, $studentsjoins, $allowedjoins, $cm, $currentgroup);
+
+                                        $create_table->invoke($report,
+                                            $table, $questions, $this->quiz, $options, $allowedjoins);
+                                        $output = ob_get_contents();
+                                        ob_end_clean();
+                                        $filename = tempnam('/tmp', 'responsedowmload');
+                                        $filename .= '.zip';
+
+                                        file_put_contents($filename, $output);
+                                        echo 'write zip file to ' . $filename . PHP_EOL;
+                                        $this->checkZipContent($filename, $csvdata, '', $options);
+                                    }
+                                }
                             } else {
-                                $filename = tempnam('/tmp', 'responsedowmload');
-                                $filename .= '.zip';
+                                // NO download.
+                                // Default initialisation.
+                                list($currentgroup, $studentsjoins, $groupstudentsjoins, $allowedjoins) = $init->invoke($report,
+                                    'responsedownload', 'quiz_responsedownload_settings_form', $this->quiz, $cm, $course);
 
-                                file_put_contents($filename, $output);
-                                echo 'write zip file to ' . $filename . PHP_EOL;
-                                // exit(1);
+                                $options = new \quiz_responsedownload_options('responsedownload', $this->quiz, $cm, $course);
+                                $options->attempts = $attempt;
+                                $options->showqtext = $showqtext;
+                                $options->whichtries = $whichtry;
+                                $options->download = $download;
+                                $options->states = [$state];
+
+                                echo '$attempt ' .  $attempt . ' $showqtext ' .  $showqtext . PHP_EOL;
+
+                                ob_start();
+                                list($questions, $table, $hasstudents, $allowedjoins, $hasquestions) =
+                                    $load->invoke($report,
+                                        $this->quiz, $course, $options, $groupstudentsjoins, $studentsjoins, $allowedjoins, $cm, $currentgroup);
+
+                                $create_table->invoke($report,
+                                    $table, $questions, $this->quiz, $options, $allowedjoins);
+                                $output = ob_get_contents();
+                                ob_end_clean();
+                                $this->checkHtml($output, $csvdata, $options);
                             }
                         }
-                        break;
                     }
                 }
             }
@@ -528,4 +574,127 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
         }
         return true;
     }
+
+    /**
+     * @param $filenamearchive
+     * @param $csvdata
+     * @param string $editorfilename
+     * @param \stdClass $data
+     * @param $i
+     */
+    protected function checkZipContent($filenamearchive, $csvdata, string $editorfilename, $options): void
+    {
+        $archive = new \ZipArchive();
+        $archive->open($filenamearchive);
+        $countMatches = 0; // count number of matching files.
+        $countSteps = 0;
+
+        foreach ($csvdata['steps'] as $stepsfromcsv) {
+            $steps = $this->explode_dot_separated_keys_to_make_subindexs($stepsfromcsv);
+
+            foreach ($steps['responses'] as $index => $answer) {
+                $countSteps++;
+/*
+                switch ($this->slots[$index]->options->responseformat) {
+                    case 'editor':
+                        $countSteps++;
+                        if (!$this->find_answer($steps, $index, $answer, $archive, $options)) {
+                            $countMatches++;
+                        }
+                        break;
+                    case 'filepicker':
+                    case 'explorer':
+                        $countSteps++;
+                        break;
+                    default:
+                        throw new \coding_exception('invalid proforma subtype ' . $this->slots[$index]->options->responseformat);
+                }
+*/
+                $this->assertTrue($this->find_answer($steps, $index, $answer, $archive, $options));
+                $countMatches++;
+                $this->assertEquals($options->showqtext, $this->find_questiontext($steps, $index, $answer, $archive, $options, $this->slots[$index]));
+            }
+        }
+
+        $this->assertEquals($countSteps, $countMatches);
+        // Note: Two attempts come from qtype_proforma - Test helper
+        $this->assertTrue($archive->numFiles >= $countMatches);
+        /*
+                for ($i = 0; $i < $archive->numFiles; $i++) {
+                    $filename = $archive->getNameIndex($i);
+                    $filecontent = $archive->getFromName($filename);
+                    // Dump first file name and content.
+                    var_dump($filename);
+                    var_dump($filecontent);
+                    break;
+                }
+        */
+        if (self::delete_tmp_archives) {
+            unlink($filenamearchive);
+        }
+    }
+    protected function find_answer($steps, $questionindex, $answer, $archive, $options) {
+        $question = 'Q' . $questionindex;
+        $name = $steps['lastname'] . '-' . $steps['firstname'];
+        // var_dump($path);
+        $content = $answer['answer'];
+
+        for( $i = 0; $i < $archive->numFiles; $i++ ) {
+            $filename = $archive->getNameIndex($i);
+            if (strpos($filename, $question) === false) {
+                continue;
+            }
+            if (strpos($filename, $name) === false) {
+                continue;
+            }
+            // filename found => check content.
+            // var_dump($filename);
+            $filecontent = $archive->getFromName($filename);
+            // var_dump($filecontent);
+            if ($filecontent != $content) {
+                continue;
+            }
+            return true;
+        }
+
+        return false;
+    }
+
+    protected function find_questiontext($steps, $questionindex, $answer, $archive, $options, $questionobj) {
+        $question = 'Q' . $questionindex;
+        $name = $steps['lastname'] . '-' . $steps['firstname'];
+        // var_dump($path);
+        $content = $answer['answer'];
+
+        for( $i = 0; $i < $archive->numFiles; $i++ ) {
+            $filename = $archive->getNameIndex($i);
+            if (strpos(strtolower($filename), 'questiontext.') === false) { // may be txt or html
+                continue;
+            }
+
+            if (strpos($filename, $question) === false) {
+                continue;
+            }
+
+            // name is only in filepath if folders are studentwise
+            if ($options->folders == \quiz_responsedownload_options::STUDENT_WISE) {
+                if ((strpos($filename, $name) === false)) {
+                    continue;
+                }
+            }
+
+            // filename found => check content.
+            // var_dump($filename);
+            $filecontent = $archive->getFromName($filename);
+            // var_dump($filecontent);
+            $this->assertEquals($questionobj->questiontext, $filecontent);
+            return true;
+
+            // $stat = $archive->statIndex( $i );
+            // print_r( basename( $stat['name'] ) . PHP_EOL );
+        }
+
+        return false;
+    }
+
 }

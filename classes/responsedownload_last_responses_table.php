@@ -438,7 +438,7 @@ ORDER BY
     }
 
     function finish_output($closeexportclassdoc = true) {
-        if (!UNITTEST_IS_RUNNING or !$this->is_downloading()) {
+        if (!defined('UNITTEST_IS_RUNNING') or !$this->is_downloading()) {
             parent::finish_output($closeexportclassdoc);
         } else {
             if ($this->exportclass!==null) {
