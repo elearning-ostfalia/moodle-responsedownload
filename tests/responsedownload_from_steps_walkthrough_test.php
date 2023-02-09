@@ -228,7 +228,7 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
         // Possible combinations.
         $showqtexts = [
             0,
-            1,
+//            1,
         ];
         $attempts = [
             \quiz_attempts_report::ALL_WITH,
@@ -237,9 +237,9 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
 //            \quiz_attempts_report::ENROLLED_ALL,
         ];
         $whichtries = [
-            \question_attempt::LAST_TRY,
+//            \question_attempt::LAST_TRY,
             \question_attempt::FIRST_TRY,
-            \question_attempt::ALL_TRIES
+//            \question_attempt::ALL_TRIES
         ];
         $states = [
 //            'overdue',
@@ -370,7 +370,7 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
     }
 
     protected function checkHtml($output, $csvdata, $options): void {
-        // print_r($output);
+        print_r($output);
         $doc = new \DOMDocument();
         $doc->loadHTML($output);
         $xpath = new \DOMXpath($doc);

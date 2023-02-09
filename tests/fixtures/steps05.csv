@@ -1,0 +1,4 @@
+quizattempt,finished,firstname,lastname,responses.1.answer,responses.1.answerformat,responses.1.-submit,responses.1.-tryagain
+1,0,John,Jones,text1,plaintext,1,0
+1,0,John,Jones,text2,plaintext,1,0
+1,1,John,Jones,text3,plaintext,1,0
