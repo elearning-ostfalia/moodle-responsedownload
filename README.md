@@ -43,3 +43,9 @@ This is the complex table class inheritence:
     quiz_responsedownload_last_responses_table [quiz_responsedownload]
     quiz_first_or_all_responses_table [quiz_responses from Moodle core]
     quiz_responsedownload_first_or_all_responses_table [quiz_responsedownload]
+
+
+# Tests
+
+Walkthough tests with question types other than 
+proforma do not run, maybe because the behaviour state machine seems to work differently
