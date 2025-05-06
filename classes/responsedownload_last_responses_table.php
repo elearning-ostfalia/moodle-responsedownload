@@ -24,7 +24,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/mod/quiz/report/attemptsreport_table.php');
+// require_once($CFG->dirroot . '/mod/quiz/report/attemptsreport_table.php');
 require_once($CFG->dirroot . '/mod/quiz/report/responsedownload/classes/dataformat_zip_writer.php');
 require_once($CFG->dirroot . '/mod/quiz/report/responsedownload/classes/table_zip_export_format.php');
 require_once($CFG->dirroot . '/mod/quiz/report/responsedownload/classes/last_responses_table.php');

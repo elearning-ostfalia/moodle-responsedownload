@@ -25,7 +25,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/mod/quiz/report/attemptsreport_table.php');
+// require_once($CFG->dirroot . '/mod/quiz/report/attemptsreport_table.php');
 
 
 /**
@@ -34,7 +34,7 @@ require_once($CFG->dirroot . '/mod/quiz/report/attemptsreport_table.php');
  * @copyright 2008 Jean-Michel Vedrine
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class quiz_last_responses_table extends quiz_attempts_report_table {
+class quiz_last_responses_table extends mod_quiz\local\reports\attempts_report_table {
 
     /**
      * Constructor

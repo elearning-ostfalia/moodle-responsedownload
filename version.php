@@ -25,8 +25,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2023020600;
-$plugin->requires = 2019111200;
+$plugin->version   = 2025050600;
+$plugin->requires = 2024100704;
 $plugin->component = 'quiz_responsedownload';
 $plugin->maturity  = MATURITY_STABLE;
-$plugin->release   = '1.0.3';
+$plugin->release   = '1.1.0';

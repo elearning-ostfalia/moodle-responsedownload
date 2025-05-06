@@ -26,7 +26,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/mod/quiz/report/attemptsreport_options.php');
+// require_once($CFG->dirroot . '/mod/quiz/report/attemptsreport_options.php');
 
 /**
  * Class to store the options for a {@link quiz_responsedownload}.
@@ -34,7 +34,7 @@ require_once($CFG->dirroot . '/mod/quiz/report/attemptsreport_options.php');
  * @copyright 2020 Ostfalia University of Applied Sciences, 2012 The Open University
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class quiz_responsedownload_options extends mod_quiz_attempts_report_options {
+class quiz_responsedownload_options extends mod_quiz\local\reports\attempts_report_options {
 
     /** @var bool whether to show the question text. */
     public $showqtext = false;

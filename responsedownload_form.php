@@ -26,14 +26,14 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/mod/quiz/report/attemptsreport_form.php');
+// require_once($CFG->dirroot . '/mod/quiz/report/attemptsreport_form.php');
 /**
  * Quiz responsedownload report settings form.
  *
  * @copyright 2008 Jean-Michel Vedrine, 2020 Ostfalia
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class quiz_responsedownload_settings_form extends mod_quiz_attempts_report_form {
+class quiz_responsedownload_settings_form extends mod_quiz\local\reports\attempts_report_options_form {
 
     /**
      * add 'preference' fields

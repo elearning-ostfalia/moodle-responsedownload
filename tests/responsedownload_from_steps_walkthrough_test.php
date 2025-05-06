@@ -25,10 +25,10 @@ define('UNITTEST_IS_RUNNING', true);
 
 global $CFG;
 require_once($CFG->dirroot . '/mod/quiz/tests/attempt_walkthrough_from_csv_test.php');
-require_once($CFG->dirroot . '/mod/quiz/report/default.php');
+// require_once($CFG->dirroot . '/mod/quiz/report/default.php');
 require_once($CFG->dirroot . '/mod/quiz/report/statistics/report.php');
 require_once($CFG->dirroot . '/mod/quiz/report/reportlib.php');
-require_once($CFG->dirroot . '/mod/quiz/report/attemptsreport.php');
+//require_once($CFG->dirroot . '/mod/quiz/report/attemptsreport.php');
 require_once($CFG->dirroot . '/mod/quiz/report/responsedownload/report.php');
 require_once($CFG->dirroot . '/question/type/proforma/question.php');
 
@@ -42,11 +42,11 @@ require_once($CFG->dirroot . '/question/type/proforma/question.php');
  * @author     Jamie Pratt <me@jamiep.org>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_walkthrough_from_csv_test {
+class responsedownload_from_steps_walkthrough_test extends \mod_quiz\tests\attempt_walkthrough_testcase {
 
     const delete_tmp_archives = false;
 
-    protected function get_full_path_of_csv_file($setname, $test) {
+    protected static function get_full_path_of_csv_file(string $setname, string $test): string {
         // Overridden here so that __DIR__ points to the path of this file.
         return  __DIR__."/fixtures/{$setname}{$test}.csv";
     }
@@ -190,7 +190,7 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\attempt_wal
      * @param array $csvdata of data read from csv file "questionsXX.csv", "stepsXX.csv" and "responsesXX.csv".
      * @dataProvider get_data_for_walkthrough
      */
-    public function test_walkthrough_from_csv($quizsettings, $csvdata)
+    public function test_walkthrough_from_csv($quizsettings, $csvdata) : void
     {
         // Suppress actual grading in qtype_proforma.
         \qtype_proforma_question::$systemundertest = true;

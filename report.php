@@ -25,9 +25,9 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/mod/quiz/report/reportlib.php');
-require_once($CFG->dirroot . '/mod/quiz/report/attemptsreport.php');
+// require_once($CFG->dirroot . '/mod/quiz/report/attemptsreport.php');
 require_once($CFG->dirroot . '/mod/quiz/report/responsedownload/responsedownload_form.php');
-require_once($CFG->dirroot . '/mod/quiz/report/attemptsreport_options.php');
+// require_once($CFG->dirroot . '/mod/quiz/report/attemptsreport_options.php');
 require_once($CFG->dirroot . '/mod/quiz/report/responsedownload/classes/responsedownload_last_responses_table.php');
 require_once($CFG->dirroot . '/mod/quiz/report/responsedownload/classes/responsedownload_first_or_all_responses_table.php');
 require_once($CFG->dirroot . '/mod/quiz/report/responsedownload/classes/responsedownload_options.php');
@@ -42,7 +42,7 @@ require_once($CFG->dirroot . '/mod/quiz/report/responsedownload/classes/response
  * @copyright 2020 Ostfalia, 1999 onwards Martin Dougiamas and others {@link http://moodle.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class quiz_responsedownload_report extends quiz_attempts_report {
+class quiz_responsedownload_report extends mod_quiz\local\reports\attempts_report {
 
     public function display($quiz, $cm, $course) {
         global $OUTPUT;
