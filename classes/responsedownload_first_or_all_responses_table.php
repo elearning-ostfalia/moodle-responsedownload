@@ -26,6 +26,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+use mod_quiz\quiz_attempt;
+
 require_once($CFG->dirroot . '/mod/quiz/report/responsedownload/classes/first_or_all_responses_table.php');
 
 /**

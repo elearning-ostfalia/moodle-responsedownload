@@ -17,7 +17,7 @@
 namespace quiz_responses;
 
 use question_bank;
-use quiz_attempt;
+use mod_quiz\quiz_attempt;
 
 defined('MOODLE_INTERNAL') || die();
 define('UNITTEST_IS_RUNNING', true);
@@ -183,6 +183,10 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\tests\attem
         return $attemptids;
     }
 
+    #[\Override]
+    protected static function get_test_files(): array {
+        return ['questions', 'steps', 'responses'];
+    }
     /**
      * Create a quiz add questions to it, walk through quiz attempts and then check results.
      *
@@ -231,10 +235,10 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\tests\attem
             1,
         ];
         $attempts = [
-            \quiz_attempts_report::ALL_WITH,
-//            \quiz_attempts_report::ENROLLED_WITH,
-//            \quiz_attempts_report::ENROLLED_WITHOUT,
-//            \quiz_attempts_report::ENROLLED_ALL,
+            \mod_quiz\local\reports\attempts_report::ALL_WITH,
+//            \mod_quiz\local\reports\attempts_report::ENROLLED_WITH,
+//            \mod_quiz\local\reports\attempts_report::ENROLLED_WITHOUT,
+//            \mod_quiz\local\reports\attempts_report::ENROLLED_ALL,
         ];
         $whichtries = [
             \question_attempt::LAST_TRY,

@@ -58,7 +58,8 @@ class quiz_responsedownload_settings_form extends mod_quiz\local\reports\attempt
                         '3' => get_string('basename', 'quiz_responsedownload')
                 ));
 
-        $mform->disabledIf('qtext', 'attempts', 'eq', quiz_attempts_report::ENROLLED_WITHOUT);
+        $mform->disabledIf('qtext', 'attempts', 'eq',
+                \mod_quiz\local\reports\attempts_report::ENROLLED_WITHOUT);
     }
 
     /**
@@ -71,7 +72,7 @@ class quiz_responsedownload_settings_form extends mod_quiz\local\reports\attempt
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
 
-        if ($data['attempts'] != quiz_attempts_report::ENROLLED_WITHOUT &&
+        if ($data['attempts'] != \mod_quiz\local\reports\attempts_report::ENROLLED_WITHOUT &&
             !($data['qtext'])) {
             $errors['coloptions'] = get_string('reportmustselectstate', 'quiz');
         }
@@ -93,7 +94,8 @@ class quiz_responsedownload_settings_form extends mod_quiz\local\reports\attempt
                                            question_attempt::ALL_TRIES    => get_string('alltries', 'question'))
             );
             $mform->setDefault('whichtries', question_attempt::LAST_TRY);
-            $mform->disabledIf('whichtries', 'attempts', 'eq', quiz_attempts_report::ENROLLED_WITHOUT);
+            $mform->disabledIf('whichtries', 'attempts', 'eq',
+                    \mod_quiz\local\reports\attempts_report::ENROLLED_WITHOUT);
         }
         $mform->addElement('advcheckbox', 'qtext',
                 get_string('include', 'quiz_responsedownload'),

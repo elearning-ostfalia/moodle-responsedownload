@@ -122,7 +122,7 @@ class quiz_responsedownload_last_responses_table extends quiz_last_responses_tab
      */
     public function __construct($quiz, $context, $qmsubselect, quiz_responsedownload_options $options,
             \core\dml\sql_join $groupstudentsjoins, \core\dml\sql_join $studentsjoins, $questions, $reporturl) {
-        quiz_attempts_report_table::__construct('mod-quiz-responsedownload', $quiz, $context,
+        \mod_quiz\local\reports\attempts_report_table::__construct('mod-quiz-responsedownload', $quiz, $context,
                 $qmsubselect, $options, $groupstudentsjoins, $studentsjoins, $questions, $reporturl);
     }
 
@@ -140,7 +140,7 @@ class quiz_responsedownload_last_responses_table extends quiz_last_responses_tab
         }
 
         $this->strtimeformat = '%F-%H-%M';
-        quiz_attempts_report_table::build_table();
+        \mod_quiz\local\reports\attempts_report_table::build_table();
     }
 
 
