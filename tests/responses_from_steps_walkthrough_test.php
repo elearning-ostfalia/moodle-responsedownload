@@ -27,6 +27,10 @@ require_once($CFG->dirroot . '/mod/quiz/tests/attempt_walkthrough_from_csv_test.
 require_once($CFG->dirroot . '/mod/quiz/report/statistics/report.php');
 require_once($CFG->dirroot . '/mod/quiz/report/reportlib.php');
 
+
+// ???????????????? DAS WAR GAR NICHT EINGECHECKT!!!
+// WELCHEN STAND HABEN WIR HIER????
+
 /**
  * Quiz attempt walk through using data from csv file.
  *
