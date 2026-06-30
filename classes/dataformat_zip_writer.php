@@ -86,6 +86,9 @@ class dataformat_zip_writer extends \core\dataformat\base {
      * Write the start of the file.
      */
     public function start_output() {
+        // Ensure folder is writable.
+        $this->filename = sys_get_temp_dir() . '/' . $this->filename;
+
         if (!$this->ziparch->open($this->filename, file_archive::OVERWRITE)) {
             debugging("Can not open zip file", DEBUG_DEVELOPER);
             $this->abort = true;

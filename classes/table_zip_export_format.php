@@ -28,7 +28,7 @@ defined('MOODLE_INTERNAL') || die();
  * Class table_zip_export_format:
  * table_dataformat_export_format derived class using the custom zip dataformat.
  */
-class table_zip_export_format extends table_dataformat_export_format {
+class table_zip_export_format extends \core_table\dataformat_export_format {
     /**
      * Constructor
      *
@@ -73,5 +73,32 @@ class table_zip_export_format extends table_dataformat_export_format {
     public function set_table_object($table) {
         // Must not be named set_table due to name clash.
         $this->dataformat->set_table($table);
+    }
+
+    public function output_headers($headers) {
+        /*
+        $this->columns = $this->format_data($headers);
+        if (method_exists($this->dataformat, 'write_header')) {
+            error_log('The function write_header() does not support multiple sheets. In order to support multiple sheets you ' .
+                'must implement start_output() and start_sheet() and remove write_header() in your dataformat.');
+            $this->dataformat->write_header($this->columns);
+        } else {
+            $this->dataformat->start_sheet($this->columns);
+        }*/
+    }
+
+    /**
+     * Add a row of data
+     *
+     * @param array $row One record of data
+     */
+    public function add_data($row) {
+        /*
+        if (!$this->supports_html()) {
+            $row = $this->format_data($row);
+        }*/
+
+        $this->dataformat->write_record($row, $this->rownum++);
+        return true;
     }
 }

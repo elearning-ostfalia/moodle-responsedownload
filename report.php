@@ -79,6 +79,9 @@ class quiz_responsedownload_report extends mod_quiz\local\reports\attempts_repor
             if ($hasquestions && ($hasstudents || $options->attempts == self::ALL_WITH)) {
                 $this->create_table($table, $questions, $quiz, $options, $allowedjoins);
             }
+        } catch (Throwable $e) {
+            echo $e->getMessage() . PHP_EOL;
+            throw $e;
         } finally {
             if (!$gcenabled) {
                 gc_disable();
