@@ -58,6 +58,8 @@ class quiz_responsedownload_options extends mod_quiz\local\reports\attempts_repo
     /** @var bool which try/tries to show responses from. */
     public $whichtries = question_attempt::LAST_TRY;
 
+    public $questionindex = null;
+
     protected function get_url_params() {
         $params = parent::get_url_params();
         $params['qtext']      = $this->showqtext;

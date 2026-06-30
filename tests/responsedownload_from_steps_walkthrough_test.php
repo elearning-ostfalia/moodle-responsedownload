@@ -46,6 +46,8 @@ class responsedownload_from_steps_walkthrough_test extends \mod_quiz\tests\attem
 
     const delete_tmp_archives = false;
 
+    private $slots = null;
+
     protected static function get_full_path_of_csv_file(string $setname, string $test): string {
         // Overridden here so that __DIR__ points to the path of this file.
         return  __DIR__."/fixtures/{$setname}{$test}.csv";

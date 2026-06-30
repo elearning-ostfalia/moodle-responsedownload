@@ -166,7 +166,7 @@ class quiz_responsedownload_last_responses_table extends quiz_last_responses_tab
                     }
                     $output .= '</i><br>';
                 }
-                if (strlen($editortext) > 150) {
+                if (!empty($editortext) && strlen($editortext) > 150) {
                     // If text is long than only show beginning of text.
                     $output .= substr($editortext, 0, 150) . '...';
                 } else {
