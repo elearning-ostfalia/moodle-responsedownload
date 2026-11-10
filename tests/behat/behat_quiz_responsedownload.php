@@ -17,13 +17,12 @@
 /**
  * Behat extensions for proforma
  *
- * @package    qtype_proforma
+ * @package    quiz_responsedownload
  * @copyright  2019 Ostfalia Hochschule fuer angewandte Wissenschaften
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 require_once(__DIR__ . '/../../../../../../lib/behat/behat_base.php');
-require_once(__DIR__ . '/../../../../../../mod/quiz/tests/behat/behat_mod_quiz.php');
 
 use Behat\Gherkin\Node\TableNode as TableNode;
 
