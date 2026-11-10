@@ -29,16 +29,14 @@ use Behat\Gherkin\Node\TableNode as TableNode;
 
 use Behat\Mink\Exception\ExpectationException as ExpectationException;
 
-class behat_responses extends behat_mod_quiz {
-
+class behat_quiz_responsedownload extends behat_base {
     protected function resolve_page_instance_url(string $type, string $identifier): moodle_url {
         switch (strtolower($type)) {
             case 'download text responses':
                 return new moodle_url('/mod/quiz/report.php',
-                    ['id' => $this->get_cm_by_quiz_name($identifier)->id, 'mode' => 'responsedownload']);
-
+                        ['id' => $this->get_cm_by_activity_name('quiz', $identifier)->id, 'mode' => 'responsedownload']);
+            default:
+                throw new Exception('Unrecognised quiz_responsedownload page type "' . $type . '."');
         }
-        return parent::resolve_page_instance_url($type, $identifier);
     }
-
 }
